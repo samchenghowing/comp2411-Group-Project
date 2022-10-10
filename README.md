@@ -5,13 +5,13 @@ For Comp2411 group project in 2022 Fall
 > https://docs.google.com/document/d/1hlkNIVKZpZ-V2_6r8qwkjUQad7oX6gREjLt8WgjHHRA/edit?usp=sharing
 
 # required dependencies:
-pip install cx_Oracle
-pip install paramiko
-pip install sshtunnel
+> pip install cx_Oracle
+> pip install paramiko
+> pip install sshtunnel
 
 Please also install and change your local oracle-client-library dir, for detail info, read the links below
-#https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
-#https://stackoverflow.com/questions/56119490/cx-oracle-error-dpi-1047-cannot-locate-a-64-bit-oracle-client-library
+https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
+https://stackoverflow.com/questions/56119490/cx-oracle-error-dpi-1047-cannot-locate-a-64-bit-oracle-client-library
 
 Here is the login guide:
-<img width="948" alt="login guide" src="[https://user-images.githubusercontent.com/56993697/194837796-5d019d0c-8225-4a7d-9756-25405eae879d.png](https://github.com/samchenghowing/comp2411-Group-Project/blob/main/Screenshot%202022-10-10%20at%2017.20.40.png)">
+<img width="948" alt="Screenshot 2022-10-10 at 17 20 40" src="https://user-images.githubusercontent.com/56993697/194839033-5fc7b367-fff8-4c29-aade-c0e9b31d66b3.png">
