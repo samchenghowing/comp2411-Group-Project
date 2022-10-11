@@ -1,13 +1,6 @@
-# install Oracle clients
+# install Oracle and ssh clients
 #pip install cx_Oracle
-#https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
-#https://stackoverflow.com/questions/56119490/cx-oracle-error-dpi-1047-cannot-locate-a-64-bit-oracle-client-library
-
-# install ssh clients
-#pip install paramiko
 #pip install sshtunnel
-#https://medium.com/@cueball45/connecting-to-oracle-rds-using-python-d019436025d4
-#https://sshtunnel.readthedocs.io/en/latest/
 
 from datetime import date
 import sys, logging
@@ -19,11 +12,12 @@ ssh_host = "csdoor.comp.polyu.edu.hk"
 ssh_user = ""
 ssh_pw = ""
 ssh_port = 22
-local_port = 3000  # any random value
+local_ip = "127.0.0.1"
+local_port = 3000
 
 # DB config
-sid = 'DBMS'
-dsn = cx_Oracle.makedsn("127.0.0.1", local_port, sid=sid)
+db_sid = 'DBMS'
+dsn = cx_Oracle.makedsn(local_ip, local_port, sid=db_sid)
 db_host = "studora.comp.polyu.edu.hk"
 db_port = 1521
 db_user = r'"21089537d"'
@@ -37,9 +31,12 @@ def run(username="21089537d", password=""):
     initLogger()
     initSSHTunnel(username, password)
     logging.getLogger('SSHClient').info("Currnent user is " + ssh_user)
-    data = run_query("select * from emp")
-    for row in data:
-        print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
+    runSQLfile("initData.sql")
+
+    # data = run_query("select * from emp")
+    # for row in data:
+    #     print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
+
 
 def initLogger():
     """Create a logger and log file named with today's day + connectionLog.txt """ 
@@ -56,6 +53,7 @@ def initSSHTunnel(username, password):
     ssh_user = username
     global ssh_pw
     ssh_pw = password
+    cx_Oracle.init_oracle_client(lib_dir=local_lib_dir)
         
 def tunnel():
   return SSHTunnelForwarder(
@@ -68,24 +66,46 @@ def tunnel():
 
 def run_query(query):
   with tunnel() as _:
+    logging.getLogger('SSHClient').info("run_query, query is: " + query)
     try:
-        cx_Oracle.init_oracle_client(lib_dir=local_lib_dir)
-        # https://intranet.comp.polyu.edu.hk/TechServices/TechnicalTips/122 (Connect Oracle via php when running on lab pc)
-        # dsn_tns = "(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(Host = studora.comp.polyu.edu.hk)(Port = 1521))) (CONNECT_DATA = (SID=DBMS)))"
-        # conn = cx_Oracle.connect(db_user=r'"21089537d"@dbms', db_password='xisbpecl', dsn=dsn_tns) 
-        conn = cx_Oracle.connect(db_user, db_password, dsn)
-        logging.getLogger('SSHClient').info(str(conn) + "Connection successful")
-        cursor = conn.cursor()
-        cursor.execute(query)
-        logging.getLogger('SSHClient').info(query + "Query executed succesfully,")
-        data = cursor.fetchall()
-        conn.close()
-        logging.getLogger('SSHClient').info("\nquery result is:\n" + str(data))
-        return data
-    except Exception as err:
-        logging.getLogger('SSHClient').info("Error connecting: cx_Oracle.init_oracle_client()" + str(err))
-        sys.exit(1)
+        with cx_Oracle.connect(db_user, db_password, dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                connection.commit()
+                data = cursor.fetchall()
+                print(data)
+                logging.getLogger('SSHClient').info(query + " result is:" + str(data))
+                
+    except cx_Oracle.Error as err:
+        print(str(err))
+        logging.getLogger('SSHClient').info("Error query: " + str(err))
+        # sys.exit(1)
 
+def run_queryList(querys):
+  with tunnel() as _:
+    logging.getLogger('SSHClient').info("run_queryList, querys are: " + str(querys))
+    try:
+        with cx_Oracle.connect(db_user, db_password, dsn) as connection:
+            with connection.cursor() as cursor:
+                for query in querys:
+                    currQuery = query.strip('\n')
+                    cursor.execute(currQuery)
+                    data = cursor.fetchall()
+                    print(data)
+                    logging.getLogger('SSHClient').info(currQuery + " result is:" + str(data))
+                connection.commit()
+                
+    except cx_Oracle.Error as err:
+        print(str(err))
+        logging.getLogger('SSHClient').info("Error query: " + str(err))
+        # sys.exit(1)
+
+def runSQLfile(fileName):
+    f = open(fileName)
+    full_sql = f.read()
+    sql_commands = full_sql.split(';')
+    run_queryList(sql_commands)
+    
 if __name__ == '__main__':
     """Main function of the program, if running in terimal, it will take first argument as user name, 
         second argument as password for connecting to the department server via ssh"""
