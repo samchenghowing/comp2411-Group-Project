@@ -1,14 +1,14 @@
 # comp2411-Group-Project
 For Comp2411 group project in 2022 Fall
 
-> Report Document:\ 
+> Report Document: 
 > https://docs.google.com/document/d/1hlkNIVKZpZ-V2_6r8qwkjUQad7oX6gREjLt8WgjHHRA/edit?usp=sharing
 
-<h1>required dependencies:</h1>
-> pip install cx_Oracle\
-> pip install sshtunnel\
+<h2>required dependencies:</h2>
+pip install cx_Oracle<br>
+pip install sshtunnel<br>
 
-Please also install and change your local oracle-client-library dir, for detail info, read the links below\
+Please also install and change your local oracle-client-library dir, for detail info, read the links below<br>
 https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html
 https://stackoverflow.com/questions/56119490/cx-oracle-error-dpi-1047-cannot-locate-a-64-bit-oracle-client-library
 
