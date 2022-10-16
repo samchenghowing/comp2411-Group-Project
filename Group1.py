@@ -1,10 +1,10 @@
-# install Oracle and ssh clients
-#pip install cx_Oracle
+#please install oracledb and sshtunnel, input below 2 lines in termial
+#pip install oracledb
 #pip install sshtunnel
 
 from datetime import date
 import logging
-import cx_Oracle
+import oracledb
 from sshtunnel import SSHTunnelForwarder
 
 # SSH config
@@ -17,14 +17,11 @@ local_port = 3000
 
 # DB config
 db_sid = 'DBMS'
-dsn = cx_Oracle.makedsn(local_ip, local_port, sid=db_sid)
+dsn = oracledb.makedsn(local_ip, local_port, sid=db_sid)
 db_host = "studora.comp.polyu.edu.hk"
 db_port = 1521
 db_user = r'"21089537d"'
 db_password = 'xisbpecl'
-
-#local oracle-client-library location:
-local_lib_dir = r"/Users/howingcheng/Downloads/instantclient_19_8"
 
 def run(username="21089537d", password=""):
     """Main program"""
@@ -33,7 +30,8 @@ def run(username="21089537d", password=""):
     logging.getLogger('SSHClient').info("Currnent user is " + ssh_user)
     isAdminUser, userStatus = checkCurrentUser(username)
     if isAdminUser:
-        runSQLfile("initData.sql")
+        run_query("select * from emp")
+        #runSQLfile("initData.sql")
         #3 Records of books checked out as well as placed on hold (i.e. “reserved” by a patron to make sure the book is there when he/she gets to the library to check it out).
     else:
         if userStatus == False:
@@ -85,7 +83,6 @@ def initSSHTunnel(username, password):
     ssh_user = username
     global ssh_pw
     ssh_pw = password
-    cx_Oracle.init_oracle_client(lib_dir=local_lib_dir)
         
 def initDatabase():
     """Create dummy data for testing and demo use"""
@@ -156,7 +153,7 @@ def run_query(query):
   with tunnel() as _:
     logging.getLogger('SSHClient').info("run_query, query is: " + query)
     try:
-        with cx_Oracle.connect(db_user, db_password, dsn) as connection:
+        with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
@@ -164,7 +161,7 @@ def run_query(query):
                 print(data)
                 logging.getLogger('SSHClient').info(query + " result is:" + str(data))
                 
-    except cx_Oracle.Error as err:
+    except oracledb.Error as err:
         print(str(err))
         logging.getLogger('SSHClient').info("Error query: " + str(err))
         # sys.exit(1)
@@ -172,7 +169,7 @@ def run_query(query):
 def run_queryList(querys):
   with tunnel() as _:
     try:
-        with cx_Oracle.connect(db_user, db_password, dsn) as connection:
+        with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 for query in querys:
                     currQuery = query.strip('\n')
@@ -181,7 +178,7 @@ def run_queryList(querys):
                     logging.getLogger('SSHClient').info(currQuery + " execute result is:" + str(data))
                 connection.commit()
                 
-    except cx_Oracle.Error as err:
+    except oracledb.Error as err:
         print(str(err))
         logging.getLogger('SSHClient').info("Error query: " + str(err))
         # sys.exit(1)
