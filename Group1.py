@@ -27,26 +27,30 @@ def run(username="21089537d", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
     initSSHTunnel(username, password)
-    initDatabase() #for testing, please update
+    #initDatabase() #for testing, please update
     isAdminUser, userStatus = checkCurrentUser(username)
     if isAdminUser:
-        var = input("Welcome admin, plese enter your checking option\n\t (1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
-        while var != "q":
-            if (var == "1"):
-                query_Result = run_query("select * from RESERVE_RECORD")
-                for row in query_Result:
-                    print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
-            elif (var == "2"):
-                query_Result = run_query("select * from RESERVE_RECORD")
-                for row in query_Result:
-                    print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
-            elif (var == "3"):
-                query_Result = run_query("select * from RESERVE_RECORD")
-                for row in query_Result:
-                    print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
-            else:
-                print("Invaild input!")
-            var = input("plese enter your checking option\n\t (1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
+        query_Result = run_query("select * from emp")
+        for row in query_Result:
+            print("emp: ",row[0], ',name', row[1] ,'occu', row[2])
+        #above is example, modify code below
+        # var = input("Welcome admin, plese enter your checking option\n\t (1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
+        # while var != "q":
+        #     if (var == "1"):
+        #         query_Result = run_query("select * from RESERVE_RECORD")
+        #         for row in query_Result:
+        #             print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
+        #     elif (var == "2"):
+        #         query_Result = run_query("select * from RESERVE_RECORD")
+        #         for row in query_Result:
+        #             print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
+        #     elif (var == "3"):
+        #         query_Result = run_query("select * from RESERVE_RECORD")
+        #         for row in query_Result:
+        #             print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
+        #     else:
+        #         print("Invaild input!")
+        #     var = input("plese enter your checking option\n\t (1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
 
         #runSQLfile("initData.sql")
         #3 Records of books checked out as well as placed on hold (i.e. “reserved” by a patron to make sure the book is there when he/she gets to the library to check it out).
@@ -77,12 +81,12 @@ def run(username="21089537d", password=""):
         for row in data:
             print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
 
-    def checkCurrentUser(userName):
-        #TO-DO please update this function
-        # Deactivate a patron’s account if he/she does not return books after a specific period of time passes.
-        isAdmin = True #if current user not found in admin, change to false
-        userStatus = False #if record record of current user not passed, change to true
-        return isAdmin, userStatus
+def checkCurrentUser(userName):
+    #TO-DO please update this function
+    # Deactivate a patron’s account if he/she does not return books after a specific period of time passes.
+    isAdmin = True #if current user not found in admin, change to false
+    userStatus = False #if record record of current user not passed, change to true
+    return isAdmin, userStatus
 
 def initLogger():
     """Create a logger and log file named with today's day + connectionLog.txt """ 
@@ -163,7 +167,6 @@ def initDatabase():
                     print("Error", error.message.rstrip(), "at row offset", error.offset)
 
     except oracledb.Error as err:
-        print(str(err))
         logging.getLogger('SSHClient').info("Error query: " + str(err))
 
 def tunnel():
