@@ -23,15 +23,14 @@ db_port = 1521
 db_user = r'"21089537d"'
 db_password = 'xisbpecl'
 
-def run(username="21089537d", password=""):
+def run(userID="21089537d", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
-    initSSHTunnel(username, password)
-    initDatabase()
-    isAdminUser, userStatus = checkCurrentUser(username)
+    initSSHTunnel(userID, password)
+    isAdminUser, userStatus = checkCurrentUser(userID)
     
     if isAdminUser:
-        var = input("Welcome admin, plese enter your checking option\n(1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
+        var = input("Welcome admin, plese enter your option\n(1 for checked-out records, 2 for reserved records, 3 for initialize Database, q for quit):")
         while var != "q":
             if (var == "1"):
                 query_Result = run_query("select * from RESERVE_RECORDS")
@@ -42,17 +41,17 @@ def run(username="21089537d", password=""):
                 for row in query_Result:
                     print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
             elif (var == "3"):
-                query_Result = run_query("select * from RECORD_SYSTEM")
-                for row in query_Result:
-                    print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
+                print("initializating...\n")
+                initDatabase()
+                print("Database initialization complete!")
             else:
                 print("Invaild input!")
-            var = input("plese enter your checking option\n(1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
+            var = input("plese enter your checking option\n(1 for checked-out records,2 for reserved records, 3 for initialize Database, q for quit):")
 
         #3 Records of books checked out as well as placed on hold (i.e. “reserved” by a patron to make sure the book is there when he/she gets to the library to check it out).
     else:
         if userStatus == False:
-            print("Your account is deactivated since you have expired books: ")
+            print("Your account is deactivated since you have expired books,\n enter book ISBN you want to return or enter q to quit: ")
             #2 The ability to deactivate a patron’s account if he/she does not return books after a specific period of time passes
         else:
             print("Welcome: ")
@@ -77,24 +76,29 @@ def run(username="21089537d", password=""):
         for row in data:
             print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
 
-def checkCurrentUser(userName):
+def checkCurrentUser(userID):
     # Deactivate a patron’s account if he/she does not return books after a specific period of time passes.
     isAdmin = False
     userStatus = True
-    # query_Result = run_query("select * from LIBRARIANS")
     query_Result = run_query("select LIBRARIAN_ID, password from LIBRARIANS")
     for row in query_Result:
-        # print("LIBRARIAN_ID: ",row[0], ', name: ', row[1] ,', password: ', row[2])
-        print("LIBRARIAN_ID:",row[0], ', password:', row[1])
-        if (row[0] == userName):
+        if (row[0] == userID):
             isAdmin = True
             return isAdmin, userStatus
 
-    query_Result = run_query("select READERS.READER_ID, LOAN_RECORDS.LoanDate from READERS INNER JOIN LOAN_RECORDS ON LOAN_RECORDS.READER_ID=LOAN_RECORDS.READER_ID")
+    query_Result = run_query("select READER_ID, Loan_date, ISBN from LOAN_RECORDS")
     for row in query_Result:
-        if (row[0] == userName):
-            return isAdmin, userStatus
-    
+        if (row[0] == userID):
+            isAdmin = False
+            today = date.today()
+            diff = today - row[1].date()
+            maxDate = run_query("select Expire_Period from RECORD_SYSTEM where ISBN =" + str(row[2]))
+            strMaxDate = str(maxDate[0]).strip(",()")
+            if diff.days > int(strMaxDate):
+                userStatus = False
+                return isAdmin, userStatus
+            else:
+                return isAdmin, userStatus
     return isAdmin, userStatus
 
 def initLogger():
@@ -138,9 +142,11 @@ def initDatabase():
         ('21089537d', 'Sam', 'pw1'),
     ]
     readers = [
+        ('21089537d', 'Sam', 'pw1', '21089537d@connect.polyu.hk'), #for my testing use
         ('12345678d', 'Reader1', 'pw2', '12345678d@connect.polyu.hk')
     ]
     loan_records = [
+        ('21089537d', '9781784975692', date(2022, 10, 23)),
         ('12345678d', '9781784975692', date(2022, 10, 23))
     ]
     reserve_records = [
@@ -150,26 +156,14 @@ def initDatabase():
         ('9781784975692', 5, 30, 1.5),
         ('9781800240346', 1, 14, 1.0)
     ]
+
+    for table in tableNames:
+        query = "drop table " + table
+        run_query(query)
+    for query in createQuerys:
+        run_query(query)
+
     with tunnel() as _:
-        for table in tableNames:
-            try:
-                with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
-                    with connection.cursor() as cursor:
-                        query = "drop table " + table
-                        cursor.execute(query)
-                        connection.commit()        
-            except oracledb.Error as err:
-                logging.getLogger('SSHClient').info("Error while deleting " + table + ": " + str(err))
-        
-        for query in createQuerys:
-            try:
-                with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(query)
-                        connection.commit()        
-            except oracledb.Error as err:
-                logging.getLogger('SSHClient').info("Error: " + query + ": " + str(err))
-        
         try:
             with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
                 with connection.cursor() as cursor:
@@ -196,9 +190,8 @@ def tunnel():
     )
 
 def run_query(query):
-    """Return a query list of current query. e.g: query=(selcet * from emp) will return all elements from table emp"""
+    """Return the query result of current query. e.g: query=(selcet * from emp) will return all elements from table emp"""
     with tunnel() as _:
-        logging.getLogger('SSHClient').info("run_query, query is: " + query)
         try:
             with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
                 with connection.cursor() as cursor:
@@ -209,35 +202,7 @@ def run_query(query):
                     return data
                     
         except oracledb.Error as err:
-            print(str(err))
             logging.getLogger('SSHClient').info("Error query: " + str(err))
-
-def run_queryList(querys):
-    """Testing use only"""
-    with tunnel() as _:
-        try:
-            with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
-                with connection.cursor() as cursor:
-                    for query in querys:
-                        currQuery = query.strip('\n')
-                        cursor.execute(currQuery)
-                        data = cursor.fetchall()
-                        logging.getLogger('SSHClient').info(currQuery + " execute result is:" + str(data))
-                    connection.commit()
-                    
-        except oracledb.Error as err:
-            print(str(err))
-            logging.getLogger('SSHClient').info("Error query: " + str(err))
-
-def runSQLfile(fileName):
-    """Testing use only"""
-    f = open(fileName)
-    full_sql = f.read()
-    sql_commands = full_sql.split(';')
-    if len(sql_commands) == 1:
-        run_query(sql_commands[0])
-    else:
-        run_queryList(sql_commands)
 
 if __name__ == '__main__':
     """Main function of the program, if running in terimal, it will take first argument as user name, 
@@ -245,6 +210,6 @@ if __name__ == '__main__':
     from sys import argv
     
     if len(argv) == 3:
-        run(username=str(argv[1]), password=str(argv[2]))
+        run(userID=str(argv[1]), password=str(argv[2]))
     else:
         print ("Please enter your comp intranet id and pw!")
