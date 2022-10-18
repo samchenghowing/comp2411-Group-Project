@@ -27,13 +27,14 @@ def run(username="21089537d", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
     initSSHTunnel(username, password)
-    #initDatabase() #for testing, please update
+    initDatabase()
     isAdminUser, userStatus = checkCurrentUser(username)
+    
     if isAdminUser:
         query_Result = run_query("select * from emp")
         for row in query_Result:
-            print("emp: ",row[0], ',name', row[1] ,'occu', row[2])
-        #above is example, modify code below
+            print("emp: ",row[0], ', name', row[1] ,', occu', row[2])
+        #above is an example, modify code below
         # var = input("Welcome admin, plese enter your checking option\n\t (1 for checked-out records,2 for reserved records, 3 for book holdings, q for quit):")
         # while var != "q":
         #     if (var == "1"):
@@ -82,10 +83,23 @@ def run(username="21089537d", password=""):
             print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
 
 def checkCurrentUser(userName):
-    #TO-DO please update this function
     # Deactivate a patron’s account if he/she does not return books after a specific period of time passes.
-    isAdmin = True #if current user not found in admin, change to false
-    userStatus = False #if record record of current user not passed, change to true
+    isAdmin = False
+    userStatus = True
+    # query_Result = run_query("select * from LIBRARIANS")
+    query_Result = run_query("select LIBRARIAN_ID, password from LIBRARIANS")
+    for row in query_Result:
+        # print("LIBRARIAN_ID: ",row[0], ', name: ', row[1] ,', password: ', row[2])
+        print("LIBRARIAN_ID: ",row[0], ', name: ', row[1])
+        if (row[0] == userName):
+            isAdmin = True
+            return isAdmin, userStatus
+
+    query_Result = run_query("select READERS.READER_ID, LOAN_RECORDS.LoanDate from READERS INNER JOIN LOAN_RECORDS ON LOAN_RECORDS.READER_ID=LOAN_RECORDS.READER_ID")
+    for row in query_Result:
+        if (row[0] == userName):
+            return isAdmin, userStatus
+    
     return isAdmin, userStatus
 
 def initLogger():
@@ -108,59 +122,99 @@ def initSSHTunnel(username, password):
         
 def initDatabase():
     """Create sample table and data for testing and demo use"""
-    books = [
-        ('9781784975692', '001', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9),
-    ]
-    publisher = [
-        ('001', 'Head of zeus'),
-    ]
-    librarian = [
-        ('Jane', date(2005, 2, 12)),
-    ]
-    reader = [
-        ('Joe', date(2006, 5, 23)),
-        ('John', date(2010, 10, 3)),
-    ]
-    loan_record = [
-        ('Joe', date(2006, 5, 23)),
-    ]
-    reserve_record = [
-        ('John', date(2010, 10, 3)),
-    ]
-    record_system = [
-        ('Joe', date(2006, 5, 23)),
-        ('John', date(2010, 10, 3)),
-    ]
-
     try:
         with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.execute("""begin
-                                    execute immediate 'drop table books';
+                                    execute immediate 'drop table BOOKS';
                                     exception when others then
                                     if sqlcode != -942 then
                                         raise;
                                     end if;
                                 end;""")
-                cursor.execute("""create table books (ISBN char(15) not null, PUBLISHER_ID char(3) not null, Title char(30), Author char(30), Category char(30), Price number(10))""")
-                
-                #TO_DO modify functions below:
                 cursor.execute("""begin
-                                    execute immediate 'drop table PUBLISHER';
+                                    execute immediate 'drop table PUBLISHERS';
                                     exception when others then
                                     if sqlcode != -942 then
                                         raise;
                                     end if;
                                 end;""")
-                cursor.execute("""create table PUBLISHER (ISBN char(15) not null, PUBLISHER_ID char(3) not null, Title char(30), Author char(30), Category char(30), Price number(10))""")
-                
-                # cursor.executemany("insert into BOOK(ISBN, data) values (:1, :2)", books, batcherrors = True)
-                # cursor.executemany("insert into PUBLISHER(PUBLISHER_ID, data) values (:1, :2)", publisher, batcherrors = True)
-                # cursor.executemany("insert into LIBRARIAN(LIBRARIAN_ID, data) values (:1, :2)", librarian, batcherrors = True)
-                # cursor.executemany("insert into READER(READER_ID, data) values (:1, :2)", reader, batcherrors = True)
-                # cursor.executemany("insert into LOAN_RECORD(LOAN_RECORD_ID, data) values (:1, :2)", loan_record, batcherrors = True)
-                # cursor.executemany("insert into RESERVE_RECORD(RESERVE_RECORD_ID, data) values (:1, :2)", reserve_record, batcherrors = True)
-                # cursor.executemany("insert into RECORD_SYSTEM(RECORD_SYSTEM, data) values (:1, :2)", record_system, batcherrors = True)
+                cursor.execute("""begin
+                                    execute immediate 'drop table LIBRARIANS';
+                                    exception when others then
+                                    if sqlcode != -942 then
+                                        raise;
+                                    end if;
+                                end;""")
+                cursor.execute("""begin
+                                    execute immediate 'drop table READERS';
+                                    exception when others then
+                                    if sqlcode != -942 then
+                                        raise;
+                                    end if;
+                                end;""")
+                cursor.execute("""begin
+                                    execute immediate 'drop table LOAN_RECORDS';
+                                    exception when others then
+                                    if sqlcode != -942 then
+                                        raise;
+                                    end if;
+                                end;""")
+                cursor.execute("""begin
+                                    execute immediate 'drop table RESERVE_RECORDS';
+                                    exception when others then
+                                    if sqlcode != -942 then
+                                        raise;
+                                    end if;
+                                end;""")
+                cursor.execute("""begin
+                                    execute immediate 'drop table RECORD_SYSTEM';
+                                    exception when others then
+                                    if sqlcode != -942 then
+                                        raise;
+                                    end if;
+                                end;""")
+
+                cursor.execute("""create table BOOKS (ISBN CHAR(13) not null, Title VARCHAR(30), Author VARCHAR(30), Category VARCHAR(30), Price number(10), PUBLISHER_ID char(3) not null)""")
+                cursor.execute("""create table PUBLISHERS (PUBLISHER_ID char(3) not null, Name VARCHAR(30))""")
+                cursor.execute("""create table LIBRARIANS (LIBRARIAN_ID char(9) not null, Name VARCHAR(30), Password VARCHAR(30))""")
+                cursor.execute("""create table READERS (READER_ID char(9) not null, Name VARCHAR(30), Password VARCHAR(30), email VARCHAR(50))""")
+                cursor.execute("""create table LOAN_RECORDS (READER_ID char(9) not null, ISBN char(13) not null, Loan_date DATE)""")
+                cursor.execute("""create table RESERVE_RECORDS  (READER_ID char(9) not null, ISBN char(13) not null, Reserve_date DATE)""")
+                cursor.execute("""create table RECORD_SYSTEM (ISBN char(13) not null), Holdings NUMBER(2) not null, Expire_Period NUMBER(2), Daily_Charge NUMBER(3, 2)""")
+
+                books = [
+                    ('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001'),
+                    ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story', 96.3, '001'),
+                ]
+                publishers = [
+                    ('001', 'Head of Zeus press'),
+                    ('002', 'I love polyu'),
+                ]
+                librarians = [
+                    ('21089537d', 'Sam', 'pw1'),
+                ]
+                readers = [
+                    ('12345678d', 'Reader1', 'pw2', '12345678d@connect.polyu.hk'),
+                ]
+                loan_records = [
+                    ('12345678d', '9781784975692', date(2022, 10, 23)),
+                ]
+                reserve_records = [
+                    ('12345678d', '9781800240346', date(2010, 10, 13)),
+                ]
+                record_system = [
+                    ('9781784975692', 5, 30, 1.5),
+                    ('9781800240346', 1, 14, 1.0),
+                ]
+                cursor.executemany("insert into BOOKS(ISBN, Title, Author, Category, Price, PUBLISHER_ID) values (:1, :2, :3, :4, :5, :6)", books, batcherrors = True)
+                cursor.executemany("insert into PUBLISHERS(PUBLISHER_ID, Name) values (:1, :2)", publishers, batcherrors = True)
+                cursor.executemany("insert into LIBRARIANS(LIBRARIAN_ID, Name, Password) values (:1, :2, :3)", librarians, batcherrors = True)
+                cursor.executemany("insert into READERS(READER_ID, Name, Password, email) values (:1, :2, :3, :4)", readers, batcherrors = True)
+                cursor.executemany("insert into LOAN_RECORDS(READER_ID, ISBN, Loan_date) values (:1, :2, :3)", loan_records, batcherrors = True)
+                cursor.executemany("insert into RESERVE_RECORDS(READER_ID, ISBN, Reserve_date) values (:1, :2, :3)", reserve_records, batcherrors = True)
+                cursor.executemany("insert into RECORD_SYSTEM(ISBN, Holdings, Expire_Period, Daily_Charge) values (:1, :2, :3, :4)", record_system, batcherrors = True)
+
                 connection.commit()        
                 logging.getLogger('SSHClient').info("Database initize success")    
                 for error in cursor.getbatcherrors():
