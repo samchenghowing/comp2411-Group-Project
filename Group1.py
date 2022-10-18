@@ -15,7 +15,7 @@ ssh_port = 22
 local_ip = "127.0.0.1"
 local_port = 3000
 
-# DB config
+# DB config, please also change db_user and db_password to use your own orcale Database for testing
 db_sid = 'DBMS'
 dsn = oracledb.makedsn(local_ip, local_port, sid=db_sid)
 db_host = "studora.comp.polyu.edu.hk"
@@ -140,6 +140,10 @@ def initDatabase():
     ]
     librarians = [
         ('21089537d', 'Sam', 'pw1'),
+        ('21094526d', 'Anya', 'pw2'),
+        ('21106945d', 'Anshu', 'pw3'),
+        ('21096414d', 'Holly', 'pw4'),
+        ('21081251D', 'Tong', 'pw5')
     ]
     readers = [
         ('21089537d', 'Sam', 'pw1', '21089537d@connect.polyu.hk'), #for my testing use
