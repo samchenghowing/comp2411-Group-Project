@@ -23,19 +23,19 @@ db_port = 1521
 db_user = r'"21089537d"'
 db_password = 'xisbpecl'
 
-def run(userID="21089537d", password=""):
+def run(userID="", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
     initSSHTunnel(userID, password)
     isAdminUser, userStatus = checkCurrentUser(userID)
+    # initDatabase() #uncomment this function for first time use. 
     
     if isAdminUser:
-        var = input("Welcome admin, plese enter your option\n(1 for checked-out records, 2 for reserved records, 3 for initialize Database, q for quit):")
+        var = input("Welcome admin, plese enter your option\n(1 for search by title, 2 for reserved records, 3 for initialize Database, q for quit):")
         while var != "q":
             if (var == "1"):
-                query_Result = run_query("select * from RESERVE_RECORDS")
-                for row in query_Result:
-                    print ("RESERVE_RECORD_ID: ",row[0], ',data', row[1])
+                title = input("plese enter the title to search: ")
+                searchByTitle(title)
             elif (var == "2"):
                 query_Result = run_query("select * from LOAN_RECORDS")
                 for row in query_Result:
@@ -54,27 +54,38 @@ def run(userID="21089537d", password=""):
             print("Your account is deactivated since you have expired books,\n enter book ISBN you want to return or enter q to quit: ")
             #2 The ability to deactivate a patron’s account if he/she does not return books after a specific period of time passes
         else:
-            print("Welcome: ")
+            name = run_query("select name from READERS where READER_ID=" + userID)
+            print("Welcome: ", name)
             #4 Notifications when the desired book becomes available and reminders that a book should be returned to the library. Both could be sent by email and/or when patron logs in to the LMS.
+            run_query("select READER_ID, ISBN from RESERVE_RECORDS ")
+            var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for check books, q for quit):")
+            while var != "q":
+                if (var == "1"):
+                    print("Please enter your option\n(1 for search by title, 2 for retrun books, 3 for loan book)")
+                else:
+                    print("Invaild input!")
+                var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for check books, q for quit):")
 
 
-    def searchByTitle(Title):
-        #TO-DO please update this function
-        data = run_query("select * from book where Title=" + Title)
+def searchByTitle(Title):
+    data = run_query("select ISBN, Title, Author, Category from books where LOWER(Title) like LOWER(\'%" + Title + "%\')") #lower for case insensitive compare 
+    if len(data) > 0:
         for row in data:
-            print ("ISBN: ",row[0], ', -', row[1])
+            print ("ISBN:",row[0], "Title:", row[1], "Author:", row[2], "Category:", row[3])
+    else:
+        print("No match books where found!")
 
-    def searchByAuthor(Author):
-        #TO-DO please update this function
-        data = run_query("select * from book where Author Name=" + Author)
-        for row in data:
-            print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
+def searchByAuthor(Author):
+    #TO-DO please update this function
+    data = run_query("select * from book where Author Name=" + Author)
+    for row in data:
+        print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
 
-    def searchByCategory(bookName):
-        #TO-DO please update this function
-        data = run_query("select * from book where bookname=" + bookName)
-        for row in data:
-            print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
+def searchByCategory(bookName):
+    #TO-DO please update this function
+    data = run_query("select * from book where bookname=" + bookName)
+    for row in data:
+        print (row[0], '-', row[1]) # this only shows the first two columns. To add an additional column you'll need to add , '-', row[2], etc.    
 
 def checkCurrentUser(userID):
     # Deactivate a patron’s account if he/she does not return books after a specific period of time passes.
@@ -206,7 +217,7 @@ def run_query(query):
                     return data
                     
         except oracledb.Error as err:
-            logging.getLogger('SSHClient').info("Error query: " + str(err))
+            logging.getLogger('SSHClient').info("Error query: " + query + str(err))
 
 if __name__ == '__main__':
     """Main function of the program, if running in terimal, it will take first argument as user name, 
