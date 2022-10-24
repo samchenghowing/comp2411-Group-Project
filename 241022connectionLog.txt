@@ -1,0 +1,17 @@
+15:11:11,240 SSHClient INFO The logger is initialized
+15:11:11,241 SSHClient INFO Currnent user is 21089537d
+15:11:13,424 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS result is:[('21094526d', 'pw2'), ('21106945d', 'pw3'), ('21096414d', 'pw4'), ('21081251D', 'pw5')]
+15:11:13,808 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('21089537d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('12345678d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30)]
+15:11:14,213 SSHClient INFO select name from READERS where READER_ID='21089537d' result is:[('Sam',)]
+15:11:14,616 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period 
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='21089537d' result is:[('The paper menagerie', datetime.datetime(2022, 10, 23, 0, 0), 30)]
+15:11:27,171 SSHClient INFO select ISBN, Title, Author, Category from books 
+                        where LOWER(Title) like LOWER('%fvd%') OR 
+                        LOWER(Author) like LOWER('%fvd%') OR 
+                        LOWER(Category) like LOWER('%fvd%')  result is:[]
+15:11:38,968 SSHClient INFO select ISBN, Title, Author, Category from books 
+                        where LOWER(Title) like LOWER('%ken%') OR 
+                        LOWER(Author) like LOWER('%ken%') OR 
+                        LOWER(Category) like LOWER('%ken%')  result is:[('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story'), ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story')]
