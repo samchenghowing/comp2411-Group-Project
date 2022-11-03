@@ -11,10 +11,9 @@ pip install sshtunnel
 
 <h3>For this repo, Group1.py is the main program, please check the TO-DO in comment, Thank you!</h3>
 For the code, you may start by looking at initDatabase() and checkCurrentUser() function.
-Also, please change the #DB config at line 23 and 24 , (db_user and db_password) to use your own orcale Database for testing.
+Also, you can change the #DB config at line 24 and 25 , (db_user and db_password) to use your own orcale Database for testing. But if you change the config, make sure to uncomment line 32 to init the data in your database!
 
 Here is the login guide for connecting to the comp intranet:
-<img width="948" alt="Screenshot 2022-10-10 at 17 20 40" src="https://user-images.githubusercontent.com/56993697/194839033-5fc7b367-fff8-4c29-aade-c0e9b31d66b3.png">
+<img width="850" alt="Screenshot 2022-11-03 at 16 50 27" src="https://user-images.githubusercontent.com/56993697/199680241-89a74953-f295-4fa2-8ac3-32962b419f31.png">
 
-
-updated 18 Oct 2022
+updated 3 NOV 2022
