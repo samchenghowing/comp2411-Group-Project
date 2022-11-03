@@ -3,6 +3,7 @@
 #pip install sshtunnel
 
 from datetime import date, timedelta
+from getpass import getpass
 import logging
 import oracledb
 from sshtunnel import SSHTunnelForwarder
@@ -71,6 +72,12 @@ def run(userID="", password=""):
                     if (searchBy == "1"): searchByTitle()
                     elif (searchBy == "2"): searchByAuthor()
                     elif (searchBy == "3"): searchByCategory()
+                elif (var == "1"):
+                    if len(data) > 0:
+                        print("Enter the book ISBN you want to return: ")
+                        #TO-DO return books
+                    else:
+                        print("You don't have loaned books!")
                 else:
                     print("Invaild input!")
                 var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for check loaned/reserved books, q for quit):")
@@ -104,6 +111,7 @@ def searchBooks(Title):
 
 def checkCurrentUser(userID):
     """ Deactivate a patron’s account if he/she does not return books after a specific period of time passes."""
+    print("logining in...")
     isAdmin = True
     userStatus = True
     query_Result = run_query("select LIBRARIAN_ID, password from LIBRARIANS")
@@ -163,7 +171,7 @@ def initDatabase():
         ('002', 'I love polyu')
     ]
     librarians = [
-        # ('21089537d', 'Sam', 'pw1'),
+        ('21089537d', 'Sam', 'pw1'),
         ('21094526d', 'Anya', 'pw2'),
         ('21106945d', 'Anshu', 'pw3'),
         ('21096414d', 'Holly', 'pw4'),
@@ -242,4 +250,6 @@ if __name__ == '__main__':
     if len(argv) == 3:
         run(userID=str(argv[1]), password=str(argv[2]))
     else:
-        print ("Please enter your comp intranet id and pw!")
+        userID = input("Please enter comp intranet id: ")
+        password = getpass("Please enter comp intranet password: ")
+        run(userID, password)

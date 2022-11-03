@@ -1,0 +1,8 @@
+16:49:45,866 SSHClient INFO The logger is initialized
+16:49:45,866 SSHClient INFO Currnent user is 21089537d
+16:49:47,165 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS result is:[('21089537d', 'pw1'), ('21094526d', 'pw2'), ('21106945d', 'pw3'), ('21096414d', 'pw4'), ('21081251D', 'pw5')]
+16:50:05,135 SSHClient INFO select ISBN, Title, Author, Category from books 
+                        where LOWER(Title) like LOWER('%the%') OR 
+                        LOWER(Author) like LOWER('%the%') OR 
+                        LOWER(Category) like LOWER('%the%')  result is:[('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story'), ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story')]
+16:50:13,916 SSHClient INFO select * from LOAN_RECORDS result is:[('21089537d', '9781784975692', datetime.datetime(2022, 10, 23, 0, 0)), ('21089537d', '9781800240346', datetime.datetime(2022, 10, 13, 0, 0)), ('12345678d', '9781784975692', datetime.datetime(2022, 10, 23, 0, 0))]
