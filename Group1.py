@@ -28,8 +28,8 @@ def run(userID="", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
     initSSHTunnel(userID, password)
-    isAdminUser, userStatus = checkCurrentUser(userID)
     # initDatabase() #uncomment this function for first time use. 
+    isAdminUser, userStatus = checkCurrentUser(userID)
     
     if isAdminUser:
         var = input("""Welcome admin, plese enter your option\n1 for search books, 2 for checking records, 3 for initialize Database, q for quit: """)
@@ -51,36 +51,67 @@ def run(userID="", password=""):
             var = input("""plese enter your your option\n1 for search books, 2 for checking records, 3 for initialize Database, q for quit: """)
     else:
         if userStatus == False:
-            #2 The ability to deactivate a patron’s account if he/she does not return books after a specific period of time passes
+            #2 Deactivate a patron’s account if he/she does not return books after a specific period of time passes
             print("Your account is deactivated since you have not return your expired book(s) listed,\n enter book ISBN you want to return or enter q to quit: ")
         else:
             name = run_query("select name from READERS where READER_ID=\'" + userID +"\'")
-            print("Welcome:", str(name[0]).strip(",()"))
-            data = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period 
+            print("Welcome:", str(name[0]).strip(",()'"))
+            data = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
                                 from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
                                 where READER_ID=\'""" + userID +"\'")
             if len(data) > 0:
                 print("Your loaned book(s) will be expired at:")
                 for row in data:
                     expireDay = row[1].date() + timedelta(days=int(row[2]))
-                    print(row[0], ", expire at:",str(expireDay))
+                    print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
 
-            var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for check loaned/reserved books, q for quit):")
+            var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
             while var != "q":
                 if (var == "1"):
                     searchBy = input("plese enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
                     if (searchBy == "1"): searchByTitle()
                     elif (searchBy == "2"): searchByAuthor()
                     elif (searchBy == "3"): searchByCategory()
-                elif (var == "1"):
+                elif (var == "2"):
                     if len(data) > 0:
-                        print("Enter the book ISBN you want to return: ")
+                        ISBN = input("Enter the book ISBN you want to return: ")
                         #TO-DO return books
                     else:
                         print("You don't have loaned books!")
+                elif (var == "3"):
+                    if len(data) <= 6:
+                        ISBN = input("Enter the book ISBN you want to loan: ")
+                        #TO-DO loan books
+                    else:
+                        print("your loan quota is exceeded!")
+                elif (var == "4"):
+                    if len(data) <= 6:
+                        ISBN = input("Enter the book ISBN you want to reserve: ")
+                        #check is reserved first 
+                        holdings = run_query("""select Holdings
+                                            from RECORD_SYSTEM
+                                            where ISBN=\'""" + ISBN +"""\' """)
+                        loaned = run_query("""select count(*)
+                                            from LOAN_RECORDS
+                                            where ISBN=\'""" + ISBN +"""\' """)
+                        #Check the availableBooks (holdings - loan record )> 0
+                        holdingsNum = str(holdings[0]).strip(",()'")
+                        loanedNum = str(loaned[0]).strip(",()'")
+                        availableBooks = int(holdingsNum[0]) - int(loanedNum[0])
+                        if availableBooks > 0:
+                            today = date.today().strftime("%m/%d/%Y")
+                            run_query("insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))")
+                            print("Reserve success!, Your current reserved books are:")
+                            query_Result = run_query("select * from RESERVE_RECORDS where READER_ID=\'" +userID +"\'")
+                            for row in query_Result:
+                                print ("READER_ID: ",row[0], ', ISBN:', row[1], ", reserved date:" , row[2])
+                        else:
+                            print("No match book found!")
+                    else:
+                        print("your loan quota is exceeded!")
                 else:
                     print("Invaild input!")
-                var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for check loaned/reserved books, q for quit):")
+                var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
 
 def searchByTitle():
     title = input("plese enter the title to search: ")
@@ -99,6 +130,7 @@ def searchByCategory():
     searchBooks(Categories)
 
 def searchBooks(Title):
+    print("Searching, please wait...")
     data = run_query("""select ISBN, Title, Author, Category from books 
                         where LOWER(Title) like LOWER(\'%""" + Title + """%\') OR 
                         LOWER(Author) like LOWER(\'%""" + Title + """%\') OR 
@@ -119,11 +151,11 @@ def checkCurrentUser(userID):
         if (row[0] == userID):
             return isAdmin, userStatus
 
+    isAdmin = False
     query_Result = run_query("""select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
                                 from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN""")
     for row in query_Result:
         if (row[0] == userID):
-            isAdmin = False
             today = date.today()
             diff = today - row[1].date()
             strMaxDate = str(row[3]).strip(",()")
@@ -155,7 +187,7 @@ def initDatabase():
     """Create sample table and data for testing and demo use"""
     print("initializating...\n")
     tableNames = ["BOOKS", "PUBLISHERS", "LIBRARIANS", "READERS", "LOAN_RECORDS", "RESERVE_RECORDS", "RECORD_SYSTEM"]
-    createQuerys = ["""create table BOOKS (ISBN VARCHAR(13) not null, Title VARCHAR(30), Author VARCHAR(30), Category VARCHAR(30), Price NUMBER(3, 1), PUBLISHER_ID VARCHAR(3) not null)""", 
+    createQuerys = ["""create table BOOKS (ISBN VARCHAR(13) not null, Title VARCHAR(50), Author VARCHAR(50), Category VARCHAR(30), Price NUMBER(4, 1), PUBLISHER_ID VARCHAR(4) not null)""", 
                     """create table PUBLISHERS (PUBLISHER_ID VARCHAR(3) not null, Name VARCHAR(30))""", 
                     """create table LIBRARIANS (LIBRARIAN_ID VARCHAR(9) not null, Name VARCHAR(30), Password VARCHAR(30))""",
                     """create table READERS (READER_ID VARCHAR(9) not null, Name VARCHAR(30), Password VARCHAR(30), email VARCHAR(50))""",
@@ -164,34 +196,38 @@ def initDatabase():
                     """create table RECORD_SYSTEM (ISBN VARCHAR(13) not null, Holdings NUMBER(2) not null, Expire_Period NUMBER(2), Daily_Charge NUMBER(3, 2))"""]
     books = [
         ('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001'),
-        ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story', 96.3, '001')
+        ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story', 96.3, '001'),
+        ('9780134583006', 'C++ How to Program', 'Paul Deitel', 'textbook', 173.2, '002'),
+        ('9780130402646', 'Database System Implementation', 'Hector Garcia-Molina', 'textbook', 140.9, '003')
     ]
     publishers = [
         ('001', 'Head of Zeus press'),
-        ('002', 'I love polyu')
+        ('002', 'Pearson'),
+        ('003', 'Prentice Hall')
     ]
     librarians = [
-        ('21089537d', 'Sam', 'pw1'),
-        ('21094526d', 'Anya', 'pw2'),
-        ('21106945d', 'Anshu', 'pw3'),
+        # ('21089537d', 'Sam', 'pw1'),
         ('21096414d', 'Holly', 'pw4'),
-        ('21081251D', 'Tong', 'pw5')
+        ('21081251d', 'Tong', 'pw5')
     ]
     readers = [
-        ('21089537d', 'Sam', 'pw1', '21089537d@connect.polyu.hk'), #for my testing use
-        ('12345678d', 'Reader1', 'pw2', '12345678d@connect.polyu.hk')
+        ('21089537d', 'Sam', 'pw1', '21094526d@connect.polyu.hk'),
+        ('21094526d', 'Anya', 'pw2', '21094526d@connect.polyu.hk'),
+        ('21106945d', 'Anshu', 'pw3', '21106945d@connect.polyu.hk')
     ]
     loan_records = [
-        ('21089537d', '9781784975692', date(2022, 10, 23)),
-        ('21089537d', '9781800240346', date(2022, 10, 13)),
-        ('12345678d', '9781784975692', date(2022, 10, 23))
+        ('21094526d', '9781784975692', date(2022, 10, 23)),
+        ('21106945d', '9781800240346', date(2022, 10, 13)),
+        ('21106945d', '9781784975692', date(2022, 10, 23))
     ]
     reserve_records = [
-        ('12345678d', '9781800240346', date(2010, 10, 13))
+        ('21106945d', '9781800240346', date(2010, 10, 13))
     ]
     record_system = [
         ('9781784975692', 5, 30, 1.5),
-        ('9781800240346', 1, 14, 1.0)
+        ('9781800240346', 1, 14, 1.0),
+        ('9780134583006', 2, 30, 2),
+        ('9780130402646', 2, 30, 1.5)
     ]
 
     for table in tableNames:
