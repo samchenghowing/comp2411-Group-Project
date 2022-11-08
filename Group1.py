@@ -42,8 +42,9 @@ def run(userID="", password=""):
             elif (var == "2"):
                 #3 Records of books checked out as well as placed on hold (i.e. “reserved” by a patron to make sure the book is there when he/she gets to the library to check it out).
                 query_Result = run_query("select * from LOAN_RECORDS")
+                print("Loan records:")
                 for row in query_Result:
-                    print ("READER_ID: ",row[0], ',data', row[1])
+                    print("READER_ID: ",row[0], ',data', row[1])
             elif (var == "3"):
                 initDatabase()
             else:
@@ -56,12 +57,12 @@ def run(userID="", password=""):
         else:
             name = run_query("select name from READERS where READER_ID=\'" + userID +"\'")
             print("Welcome:", str(name[0]).strip(",()'"))
-            data = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
+            loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
                                 from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
                                 where READER_ID=\'""" + userID +"\'")
-            if len(data) > 0:
+            if len(loanedBooks) > 0:
                 print("Your loaned book(s) will be expired at:")
-                for row in data:
+                for row in loanedBooks:
                     expireDay = row[1].date() + timedelta(days=int(row[2]))
                     print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
 
@@ -73,28 +74,66 @@ def run(userID="", password=""):
                     elif (searchBy == "2"): searchByAuthor()
                     elif (searchBy == "3"): searchByCategory()
                 elif (var == "2"):
-                    if len(data) > 0:
+                    if len(loanedBooks) > 0:
+                        print("Your loaned book(s):")
+                        for row in loanedBooks:
+                            expireDay = row[1].date() + timedelta(days=int(row[2]))
+                            print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
                         ISBN = input("Enter the book ISBN you want to return: ")
-                        #TO-DO return books
+                        isVaildISBN = False
+                        for row in loanedBooks:
+                            if ISBN == row[3]:
+                                isVaildISBN = True
+                                break
+                        if isVaildISBN:
+                            run_query("""delete from LOAN_RECORDS where ISBN=\'""" + ISBN +"""\' """)
+                            query_Result = run_query("select * from LOAN_RECORDS where READER_ID=\'" +userID +"\'")
+                            print("Your loaned book(s):")
+                            loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
+                                                        from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                                        where READER_ID=\'""" + userID +"\'")
+                            for row in loanedBooks:
+                                expireDay = row[1].date() + timedelta(days=int(row[2]))
+                                print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
+                        else:
+                            print("You input ISBN is not vaild/ you did not load that book")
                     else:
                         print("You don't have loaned books!")
                 elif (var == "3"):
-                    if len(data) <= 6:
+                    if len(loanedBooks) <= 6:
                         ISBN = input("Enter the book ISBN you want to loan: ")
-                        #TO-DO loan books
-                    else:
-                        print("your loan quota is exceeded!")
-                elif (var == "4"):
-                    if len(data) <= 6:
-                        ISBN = input("Enter the book ISBN you want to reserve: ")
-                        #check is reserved first 
+                        #TO-DO (Optional) check is loan/reserved first to make sure user will not occupy more than one same book,
+                        #TO-DO check the book is holded by the library first, ISBN is vaild?
                         holdings = run_query("""select Holdings
                                             from RECORD_SYSTEM
                                             where ISBN=\'""" + ISBN +"""\' """)
                         loaned = run_query("""select count(*)
                                             from LOAN_RECORDS
                                             where ISBN=\'""" + ISBN +"""\' """)
-                        #Check the availableBooks (holdings - loan record )> 0
+                        holdingsNum = str(holdings[0]).strip(",()'")
+                        loanedNum = str(loaned[0]).strip(",()'")
+                        availableBooks = int(holdingsNum[0]) - int(loanedNum[0])
+                        if availableBooks > 0:
+                            today = date.today().strftime("%m/%d/%Y")
+                            run_query("insert into LOAN_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))")
+                            print("Loan success!, Your current loan books are:")
+                            query_Result = run_query("select * from LOAN_RECORDS where READER_ID=\'" +userID +"\'")
+                            for row in query_Result:
+                                print ("READER_ID: ",row[0], ', ISBN:', row[1], ", reserved date:" , row[2])
+                        else:
+                            print("The library holding of selected book is currently out of stock, please check again later.")
+                    else:
+                        print("your loan quota is exceeded!")
+                elif (var == "4"):
+                    if len(loanedBooks) <= 6:
+                        ISBN = input("Enter the book ISBN you want to reserve: ")
+                        #TO-DO (Optional) check is loan/reserved first to make sure user will not occupy more than one same book
+                        holdings = run_query("""select Holdings
+                                            from RECORD_SYSTEM
+                                            where ISBN=\'""" + ISBN +"""\' """)
+                        loaned = run_query("""select count(*)
+                                            from LOAN_RECORDS
+                                            where ISBN=\'""" + ISBN +"""\' """)
                         holdingsNum = str(holdings[0]).strip(",()'")
                         loanedNum = str(loaned[0]).strip(",()'")
                         availableBooks = int(holdingsNum[0]) - int(loanedNum[0])
@@ -106,9 +145,9 @@ def run(userID="", password=""):
                             for row in query_Result:
                                 print ("READER_ID: ",row[0], ', ISBN:', row[1], ", reserved date:" , row[2])
                         else:
-                            print("No match book found!")
+                            print("The library holding of selected book is currently out of stock, please check again later.")
                     else:
-                        print("your loan quota is exceeded!")
+                        print("your reserve quota is exceeded!")
                 else:
                     print("Invaild input!")
                 var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
