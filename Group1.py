@@ -28,7 +28,7 @@ def run(userID="", password=""):
     """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
     initLogger()
     initSSHTunnel(userID, password)
-    # initDatabase() #uncomment this function for first time use. 
+    # initDatabase() #uncomment this function for first time use (testing only). 
     isAdminUser, userStatus = checkCurrentUser(userID)
     
     if isAdminUser:
@@ -40,20 +40,36 @@ def run(userID="", password=""):
                 elif (searchBy == "2"): searchByAuthor()
                 elif (searchBy == "3"): searchByCategory()
             elif (var == "2"):
-                #3 Records of books checked out as well as placed on hold (i.e. “reserved” by a patron to make sure the book is there when he/she gets to the library to check it out).
+                #3 Records of books checked out as well as placed on hold
+                #TO-DO change the code to a fuction
                 query_Result = run_query("select * from LOAN_RECORDS")
                 print("Loan records:")
                 for row in query_Result:
                     print("READER_ID: ",row[0], ',data', row[1])
+
+                query_Result = run_query("select * from RESERVE_RECORDS")
+                print("Reserve records:")
+                for row in query_Result:
+                    print("READER_ID: ",row[0], ',data', row[1])
+                
+                #TO-DO display the number of books on hold by library
             elif (var == "3"):
-                initDatabase()
+                isInit = input("Warning! All current changes will be discard from database and database will restore to original version, are you sure? Y/N")
+                if (isInit == 'y' or isInit == 'Y'):
+                    initDatabase()
             else:
                 print("Invaild input!")
             var = input("""plese enter your your option\n1 for search books, 2 for checking records, 3 for initialize Database, q for quit: """)
     else:
         if userStatus == False:
             #2 Deactivate a patron’s account if he/she does not return books after a specific period of time passes
-            print("Your account is deactivated since you have not return your expired book(s) listed,\n enter book ISBN you want to return or enter q to quit: ")
+            print("Your account is deactivated since you have not return your expired book(s) listed")
+            loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID=\'""" + userID +"\'")
+            for row in loanedBooks:
+                expireDay = row[1].date() + timedelta(days=int(row[2]))
+                print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
         else:
             name = run_query("select name from READERS where READER_ID=\'" + userID +"\'")
             print("Welcome:", str(name[0]).strip(",()'"))
@@ -79,12 +95,14 @@ def run(userID="", password=""):
                         for row in loanedBooks:
                             expireDay = row[1].date() + timedelta(days=int(row[2]))
                             print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
+
                         ISBN = input("Enter the book ISBN you want to return: ")
                         isVaildISBN = False
                         for row in loanedBooks:
                             if ISBN == row[3]:
                                 isVaildISBN = True
                                 break
+                        #TO-DO add else, if is not vaild ISBN (not loaned by the user)
                         if isVaildISBN:
                             run_query("""delete from LOAN_RECORDS where ISBN=\'""" + ISBN +"""\' """)
                             query_Result = run_query("select * from LOAN_RECORDS where READER_ID=\'" +userID +"\'")
@@ -103,7 +121,7 @@ def run(userID="", password=""):
                     if len(loanedBooks) <= 6:
                         ISBN = input("Enter the book ISBN you want to loan: ")
                         #TO-DO (Optional) check is loan/reserved first to make sure user will not occupy more than one same book,
-                        #TO-DO check the book is holded by the library first, ISBN is vaild?
+                        #TO-DO check the book is holded by the library first, (is ISBN vaild?)
                         holdings = run_query("""select Holdings
                                             from RECORD_SYSTEM
                                             where ISBN=\'""" + ISBN +"""\' """)
@@ -154,11 +172,11 @@ def run(userID="", password=""):
 
 def searchByTitle():
     title = input("plese enter the title to search: ")
-    searchBooks(title)
+    searchBooks(title, 1)
 
 def searchByAuthor():
     Author = input("plese enter the Author to search: ")
-    searchBooks(Author)
+    searchBooks(Author, 2)
 
 def searchByCategory():
     data = run_query("select distinct Category from books")
@@ -166,14 +184,20 @@ def searchByCategory():
     for row in data:
         print(row[0])
     Categories = input("plese enter the Categories to search: ")
-    searchBooks(Categories)
+    searchBooks(Categories, 3)
 
-def searchBooks(Title):
+def searchBooks(para, type):
+    """Search book function to search book by the user input and search type (1:title, 2: author, 3: category) """
     print("Searching, please wait...")
-    data = run_query("""select ISBN, Title, Author, Category from books 
-                        where LOWER(Title) like LOWER(\'%""" + Title + """%\') OR 
-                        LOWER(Author) like LOWER(\'%""" + Title + """%\') OR 
-                        LOWER(Category) like LOWER(\'%""" + Title + """%\') """) #lower for case insensitive compare 
+    if type == 1:
+        data = run_query("""select ISBN, Title, Author, Category from books 
+                            where LOWER(Title) like LOWER(\'%""" + para + """%\') """) #lower for case insensitive compare 
+    elif type == 2:
+        data = run_query("""select ISBN, Title, Author, Category from books 
+                            where LOWER(Author) like LOWER(\'%""" + para + """%\') """) 
+    else:
+        data = run_query("""select ISBN, Title, Author, Category from books 
+                            where LOWER(Category) like LOWER(\'%""" + para + """%\') """) 
     if len(data) > 0:
         for row in data:
             print("ISBN:",row[0], "Title:", row[1], "Author:", row[2], "Category:", row[3])
@@ -224,6 +248,7 @@ def initSSHTunnel(username, password):
         
 def initDatabase():
     """Create sample table and data for testing and demo use"""
+    #TO-DO add more data
     print("initializating...\n")
     tableNames = ["BOOKS", "PUBLISHERS", "LIBRARIANS", "READERS", "LOAN_RECORDS", "RESERVE_RECORDS", "RECORD_SYSTEM"]
     createQuerys = ["""create table BOOKS (ISBN VARCHAR(13) not null, Title VARCHAR(50), Author VARCHAR(50), Category VARCHAR(30), Price NUMBER(4, 1), PUBLISHER_ID VARCHAR(4) not null)""", 
@@ -304,6 +329,7 @@ def tunnel():
 
 def run_query(query):
     """Return the query result of current query. e.g: query=(selcet * from emp) will return all elements from table emp"""
+    #TO-DO (optional) check SQL injection in query=(selcet * from emp where username=(update/ insert/ delete ...))
     with tunnel() as _:
         try:
             with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
