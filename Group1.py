@@ -5,6 +5,7 @@
 from datetime import date, timedelta
 from getpass import getpass
 import logging
+import os
 import oracledb
 from sshtunnel import SSHTunnelForwarder
 
@@ -206,7 +207,9 @@ def checkCurrentUser(userID):
 def initLogger():
     """Create a logger and log file named with today's day + connectionLog.txt """ 
     today = date.today()
-    logging.basicConfig(filename=(today.strftime("%d%m%y")+"connectionLog.txt"),
+    if not os.path.exists("Logs"):
+        os.makedirs("Logs")
+    logging.basicConfig(filename=f'Logs/{today.strftime("%d%m%y")+"connectionLog.txt"}',
                                 filemode='a',
                                 format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                                 datefmt='%H:%M:%S',
