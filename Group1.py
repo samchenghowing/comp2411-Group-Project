@@ -5,6 +5,7 @@
 from datetime import date, timedelta
 from getpass import getpass
 import logging
+import os
 import oracledb
 from sshtunnel import SSHTunnelForwarder
 
@@ -82,7 +83,7 @@ def run(userID="", password=""):
                     expireDay = row[1].date() + timedelta(days=int(row[2]))
                     print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
 
-            var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
+            var = input("plese enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
             while var != "q":
                 if (var == "1"):
                     searchBy = input("plese enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
@@ -230,7 +231,9 @@ def checkCurrentUser(userID):
 def initLogger():
     """Create a logger and log file named with today's day + connectionLog.txt """ 
     today = date.today()
-    logging.basicConfig(filename=(today.strftime("%d%m%y")+"connectionLog.txt"),
+    if not os.path.exists("Logs"):
+        os.makedirs("Logs")
+    logging.basicConfig(filename=f'Logs/{today.strftime("%d%m%y")+"connectionLog.txt"}',
                                 filemode='a',
                                 format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                                 datefmt='%H:%M:%S',
@@ -278,6 +281,7 @@ def initDatabase():
         ('21089537d', 'Sam', 'pw1', '21094526d@connect.polyu.hk'),
         ('21094526d', 'Anya', 'pw2', '21094526d@connect.polyu.hk'),
         ('21106945d', 'Anshu', 'pw3', '21106945d@connect.polyu.hk')
+        #, ('21096414d', 'Holly', 'pw4', '21096414d@connect.polyu.hk')
     ]
     loan_records = [
         ('21094526d', '9781784975692', date(2022, 10, 23)),
