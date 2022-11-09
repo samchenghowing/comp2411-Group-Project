@@ -253,6 +253,7 @@ def initDatabase():
         ('21089537d', 'Sam', 'pw1', '21094526d@connect.polyu.hk'),
         ('21094526d', 'Anya', 'pw2', '21094526d@connect.polyu.hk'),
         ('21106945d', 'Anshu', 'pw3', '21106945d@connect.polyu.hk')
+        #, ('21096414d', 'Holly', 'pw4', '21096414d@connect.polyu.hk')
     ]
     loan_records = [
         ('21094526d', '9781784975692', date(2022, 10, 23)),
