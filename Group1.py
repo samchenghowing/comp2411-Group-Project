@@ -66,7 +66,7 @@ def run(userID="", password=""):
                     expireDay = row[1].date() + timedelta(days=int(row[2]))
                     print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
 
-            var = input("plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
+            var = input("plese enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
             while var != "q":
                 if (var == "1"):
                     searchBy = input("plese enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
