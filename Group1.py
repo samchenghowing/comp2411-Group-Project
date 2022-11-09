@@ -64,13 +64,17 @@ def run(userID="", password=""):
     else:
         if userStatus == False:
             #2 Deactivate a patron’s account if he/she does not return books after a specific period of time passes
-            print("Your account is deactivated since you have not return your expired book(s) listed")
-            loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
-                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
-                                where READER_ID=\'""" + userID +"\'")
+            print("Your account is deactivated since you have not return your expired book(s) listed:")
+            loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                        from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                        where READER_ID=\'""" + userID +"\'")
             for row in loanedBooks:
                 expireDay = row[1].date() + timedelta(days=int(row[2]))
-                print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
+                today = date.today()
+                diff = today - expireDay
+                expirefee = float(row[4]) * int(diff.days)
+                print("ISBN:",row[3],"Title:", row[0], ", expire at:", str(expireDay), "Expire fee:", str(expirefee))
+            print("Please return the book(s) and pay the expire fee in-person to reactivate your account!")
         else:
             name = run_query("select name from READERS where READER_ID=\'" + userID +"\'")
             print("Welcome:", str(name[0]).strip(",()'"))
@@ -284,6 +288,7 @@ def initDatabase():
         #, ('21096414d', 'Holly', 'pw4', '21096414d@connect.polyu.hk')
     ]
     loan_records = [
+        ('21089537d', '9780130402646', date(2022, 9, 15)),
         ('21094526d', '9781784975692', date(2022, 10, 23)),
         ('21106945d', '9781800240346', date(2022, 10, 13)),
         ('21106945d', '9781784975692', date(2022, 10, 23))
