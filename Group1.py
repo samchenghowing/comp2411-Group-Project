@@ -26,11 +26,11 @@ db_user = r'"21089537d"'
 db_password = 'xisbpecl'
 
 def run(compUserID="", compPassword=""):
-    """Main program, the first and second parameter is your studentId and password for loging in to comp intranet """
+    """Main program, the first and second parameter is the studentId and password for loging in to comp intranet """
     initLogger()
     successSSHLogin = initSSHTunnel(compUserID, compPassword)
     if (successSSHLogin):
-        # initDatabase() #uncomment this function for first time use (testing only).
+        # initDatabase()
         userID = input("Welcome to Library management system, \nPlease input your userID: ")
         password = input("Please input your password: ")
         isAdminUser, vaildPassword, userStatus = checkCurrentUser(userID, password)
@@ -48,19 +48,23 @@ def run(compUserID="", compPassword=""):
                             elif (searchBy == "2"): searchByAuthor()
                             elif (searchBy == "3"): searchByCategory()
                         elif (var == "2"):
-                            #3 Records of books checked out as well as placed on hold
-                            #TO-DO change the code to a fuction
-                            query_Result = run_query("select * from LOAN_RECORDS")
-                            print("Loan records:")
-                            for row in query_Result:
-                                print("READER_ID: ",row[0], ',data', row[1])
+                            checkBy = input("plese enter your check option\n(1 for check loan record, 2 for check reserve record, 3 for check holdings):")
+                            if (checkBy == "1"): 
+                                query_Result = run_query("select * from LOAN_RECORDS")
+                                print("Loan records:")
+                                for row in query_Result:
+                                    print("READER_ID: ",row[0], ',data', row[1])
+                            elif (checkBy == "2"): 
+                                query_Result = run_query("select * from RESERVE_RECORDS")
+                                print("Reserve records:")
+                                for row in query_Result:
+                                    print("READER_ID: ",row[0], ',data', row[1])
+                            elif (checkBy == "3"): 
+                                ISBN = input("Enter a ISBN of book to check it's current holding in library:")
+                                holdings = checkHoldings(ISBN)
+                                if holdings > 0:
+                                    print(ISBN, holdings)
 
-                            query_Result = run_query("select * from RESERVE_RECORDS")
-                            print("Reserve records:")
-                            for row in query_Result:
-                                print("READER_ID: ",row[0], ',data', row[1])
-                            
-                            #TO-DO display the number of books on hold by library
                         elif (var == "3"):
                             isInit = input("Warning! All current changes will be discard from database and database will restore to original version, are you sure? Y/N")
                             if (isInit == 'y' or isInit == 'Y'):
@@ -72,28 +76,12 @@ def run(compUserID="", compPassword=""):
                     if userStatus == False:
                         #2 Deactivate a patron’s account if he/she does not return books after a specific period of time passes
                         print("Your account is deactivated since you have not return your expired book(s) listed:")
-                        loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
-                                                    from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
-                                                    where READER_ID=\'""" + userID +"\'")
-                        for row in loanedBooks:
-                            expireDay = row[1].date() + timedelta(days=int(row[2]))
-                            today = date.today()
-                            diff = today - expireDay
-                            expirefee = float(row[4]) * int(diff.days)
-                            print("ISBN:",row[3],"Title:", row[0], ", expire at:", str(expireDay), "Expire fee:", str(expirefee))
+                        loanedBooks = getLoanedBooks(userID)
                         print("Please return the book(s) and pay the expire fee in-person to reactivate your account!")
                     else:
                         name = run_query("select name from READERS where READER_ID=\'" + userID +"\'")
                         print("Welcome:", str(name[0]).strip(",()'"))
-                        loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
-                                            from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
-                                            where READER_ID=\'""" + userID +"\'")
-                        if len(loanedBooks) > 0:
-                            print("Your loaned book(s) will be expired at:")
-                            for row in loanedBooks:
-                                expireDay = row[1].date() + timedelta(days=int(row[2]))
-                                print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
-
+                        loanedBooks = getLoanedBooks(userID)
                         var = input("plese enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
                         while var != "q":
                             if (var == "1"):
@@ -103,28 +91,15 @@ def run(compUserID="", compPassword=""):
                                 elif (searchBy == "3"): searchByCategory()
                             elif (var == "2"):
                                 if len(loanedBooks) > 0:
-                                    print("Your loaned book(s):")
-                                    for row in loanedBooks:
-                                        expireDay = row[1].date() + timedelta(days=int(row[2]))
-                                        print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
-
                                     ISBN = input("Enter the book ISBN you want to return: ")
                                     isVaildISBN = False
                                     for row in loanedBooks:
                                         if ISBN == row[3]:
                                             isVaildISBN = True
                                             break
-                                    #TO-DO add else, if is not vaild ISBN (not loaned by the user)
                                     if isVaildISBN:
-                                        run_query("""delete from LOAN_RECORDS where ISBN=\'""" + ISBN +"""\' """)
-                                        query_Result = run_query("select * from LOAN_RECORDS where READER_ID=\'" +userID +"\'")
-                                        print("Your loaned book(s):")
-                                        loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN 
-                                                                    from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
-                                                                    where READER_ID=\'""" + userID +"\'")
-                                        for row in loanedBooks:
-                                            expireDay = row[1].date() + timedelta(days=int(row[2]))
-                                            print("ISBN:",row[3],"Title:", row[0], ", expire at:",str(expireDay))
+                                        run_query("""delete from LOAN_RECORDS where ISBN=\'""" + ISBN +"""\' and READER_ID=\'""" + userID +"""\'""", False)
+                                        loanedBooks = getLoanedBooks(userID)
                                     else:
                                         print("You input ISBN is not vaild/ you did not load that book")
                                 else:
@@ -132,24 +107,21 @@ def run(compUserID="", compPassword=""):
                             elif (var == "3"):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to loan: ")
-                                    #TO-DO (Optional) check is loan/reserved first to make sure user will not occupy more than one same book,
-                                    #TO-DO check the book is holded by the library first, (is ISBN vaild?)
-                                    holdings = run_query("""select Holdings
-                                                        from RECORD_SYSTEM
-                                                        where ISBN=\'""" + ISBN +"""\' """)
-                                    loaned = run_query("""select count(*)
-                                                        from LOAN_RECORDS
-                                                        where ISBN=\'""" + ISBN +"""\' """)
-                                    holdingsNum = str(holdings[0]).strip(",()'")
-                                    loanedNum = str(loaned[0]).strip(",()'")
-                                    availableBooks = int(holdingsNum[0]) - int(loanedNum[0])
-                                    if availableBooks > 0:
+                                    #TO-DO (Optional) check if the book is loan by current user first to make sure user will not occupy more than one same book,
+                                    isReserved = False
+                                    reservedBooks = getReservedBooks(userID, False) #if it is Reserved by current user, remove the reserve record
+                                    for row in reservedBooks:
+                                        if ISBN in row[3]:
+                                            isReserved = True
+                                            break
+                                    if isReserved:
+                                        run_query("""delete from RESERVE_RECORDS where ISBN=\'""" + ISBN +"""\' and READER_ID=\'""" + userID +"""\'""", False)
+
+                                    if checkHoldings(ISBN) > 0:
                                         today = date.today().strftime("%m/%d/%Y")
                                         run_query("insert into LOAN_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))")
-                                        print("Loan success!, Your current loan books are:")
-                                        query_Result = run_query("select * from LOAN_RECORDS where READER_ID=\'" +userID +"\'")
-                                        for row in query_Result:
-                                            print ("READER_ID: ",row[0], ', ISBN:', row[1], ", reserved date:" , row[2])
+                                        print("Loan success!")
+                                        loanedBooks = getLoanedBooks(userID)
                                     else:
                                         print("The library holding of selected book is currently out of stock, please check again later.")
                                 else:
@@ -157,23 +129,14 @@ def run(compUserID="", compPassword=""):
                             elif (var == "4"):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to reserve: ")
-                                    #TO-DO (Optional) check is loan/reserved first to make sure user will not occupy more than one same book
-                                    holdings = run_query("""select Holdings
-                                                        from RECORD_SYSTEM
-                                                        where ISBN=\'""" + ISBN +"""\' """)
-                                    loaned = run_query("""select count(*)
-                                                        from LOAN_RECORDS
-                                                        where ISBN=\'""" + ISBN +"""\' """)
-                                    holdingsNum = str(holdings[0]).strip(",()'")
-                                    loanedNum = str(loaned[0]).strip(",()'")
-                                    availableBooks = int(holdingsNum[0]) - int(loanedNum[0])
-                                    if availableBooks > 0:
+                                    #TO-DO (Optional) check is reserved by current user first to make sure user will not occupy more than one same book,
+                                    # getReservedBooks(userID)
+
+                                    if checkHoldings(ISBN) > 0:
                                         today = date.today().strftime("%m/%d/%Y")
-                                        run_query("insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))")
-                                        print("Reserve success!, Your current reserved books are:")
-                                        query_Result = run_query("select * from RESERVE_RECORDS where READER_ID=\'" +userID +"\'")
-                                        for row in query_Result:
-                                            print ("READER_ID: ",row[0], ', ISBN:', row[1], ", reserved date:" , row[2])
+                                        run_query("insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
+                                        print("Reserve success!")
+                                        getReservedBooks(userID)
                                     else:
                                         print("The library holding of selected book is currently out of stock, please check again later.")
                                 else:
@@ -186,15 +149,65 @@ def run(compUserID="", compPassword=""):
     else:
         print("Your comp intranet username/ password is not correct, cannot connect to department server")
 
+def getReservedBooks(userID, show=True):
+    """get the books reserved by current user (userID), it will display the record if (show) is true """
+    reservedBooks = run_query("""select BOOKS.Title, RESERVE_RECORDS.Reserve_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN
+                                from RESERVE_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=RESERVE_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID=\'""" + userID +"\'")
+    if len(reservedBooks) > 0:
+        print("Your reserved book(s):")
+        for row in reservedBooks:
+            expireDay = row[1].date() + timedelta(days=int(row[2]))
+            print("ISBN:",row[3],"Title:", row[0], " reserve period ends at:", str(expireDay))
+    else:
+        print("You don't have books reserved")
+    return reservedBooks
+
+def getLoanedBooks(userID, show=True):
+    """get the books loaned by current user (userID), it will display the record if (show) is true """
+    loanedBooks = run_query("""select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID=\'""" + userID +"\'")
+    if show:
+        if len(loanedBooks) > 0:
+            print("Your loaned book(s):")
+            for row in loanedBooks:
+                expireDay = row[1].date() + timedelta(days=int(row[2]))
+                today = date.today()
+                diff = today - expireDay
+                expirefee = float(row[4]) * int(diff.days)
+                if diff.days <= 0:
+                    print("ISBN:",row[3],"Title:", row[0], "will expire at:", str(expireDay))
+                else:
+                    print("ISBN:",row[3],"Title:", row[0], "expired at:", str(expireDay), "Expire fee:", str(expirefee))
+        else:
+            print("you don't have loaned books")
+    return loanedBooks
+
+def checkHoldings(ISBN):
+    """Return a number of books hold by the library (not loaned out/ reserved)"""
+    holdings = run_query("""select Holdings from RECORD_SYSTEM where ISBN=\'""" + ISBN +"""\' """)
+    if len(holdings) == 0:
+        return -1 #book not exist (not holded by the library)
+    loaned = run_query("""select count(*) from LOAN_RECORDS where ISBN=\'""" + ISBN +"""\' """)
+    reserved = run_query("""select count(*) from RESERVE_RECORDS where ISBN=\'""" + ISBN +"""\' """)
+    holdingsNum = str(holdings[0]).strip(",()'")
+    loanedNum = str(loaned[0]).strip(",()'")
+    reservedNum = str(reserved[0]).strip(",()'")
+    return (int(holdingsNum[0]) - int(loanedNum[0]) - int(reservedNum[0]))
+
 def searchByTitle():
+    """Search book by title"""
     title = input("plese enter the title to search: ")
     searchBooks(title, 1)
 
 def searchByAuthor():
+    """Search book by Author"""
     Author = input("plese enter the Author to search: ")
     searchBooks(Author, 2)
 
 def searchByCategory():
+    """Search book by Category"""
     data = run_query("select distinct Category from books")
     print ("Listed Categories in libary system: ")
     for row in data:
@@ -318,22 +331,22 @@ def initDatabase():
     ]
     librarians = [
         # LIBRARIAN_ID VARCHAR(9) not null, Name VARCHAR(30), Password VARCHAR(30)
-        # ('21089537d', 'Sam', 'pw1'),
-        ('21096414d', 'Holly', 'pw4'),
+        ('samAdmin', 'Sam', 'pw1'),
+        ('Holly.Z', 'Holly', 'pw4'),
         ('21081251d', 'Tong', 'pw5')
     ]
     readers = [
         # READER_ID VARCHAR(9) not null, Name VARCHAR(30), Password VARCHAR(30), email VARCHAR(50)
-        ('21089537d', 'Sam', 'pw1', '21094526d@connect.polyu.hk'),
-        ('21094526d', 'Anya', 'pw2', '21094526d@connect.polyu.hk'),
-        ('21106945d', 'Anshu', 'pw3', '21106945d@connect.polyu.hk')
-        #, ('21096414d', 'Holly', 'pw4', '21096414d@connect.polyu.hk')
+        ('samReader', 'Sam', 'pw1', '21089537d@connect.polyu.hk'),
+        ('AnyaYA', 'Anya', 'pw2', '21094526d@connect.polyu.hk'),
+        ('21106945d', 'Anshu', 'pw3', '21106945d@connect.polyu.hk'), 
+        ('21096414d', 'Holly', 'pw4', '21096414d@connect.polyu.hk')
     ]
     loan_records = [
         # READER_ID VARCHAR(9) not null, ISBN VARCHAR(13) not null, Loan_date DATE
-        ('21089537d', '9780130402646', date(2022, 9, 15)),
-        ('21094526d', '9781784975692', date(2022, 10, 23)),
-        ('21106945d', '9781800240346', date(2022, 10, 13)),
+        ('samReader', '9780130402646', date(2022, 10, 15)),
+        ('AnyaYA', '9781784975692', date(2022, 10, 23)),
+        ('AnyaYA', '9781800240346', date(2022, 10, 13)),
         ('21106945d', '9781784975692', date(2022, 10, 23))
     ]
     reserve_records = [
@@ -350,9 +363,9 @@ def initDatabase():
 
     for table in tableNames:
         query = "drop table " + table
-        run_query(query)
+        run_query(query, False)
     for query in createQuerys:
-        run_query(query)
+        run_query(query, False)
 
     with tunnel() as _:
         try:
@@ -381,8 +394,9 @@ def tunnel():
         local_bind_address=('0.0.0.0', local_port)
     )
 
-def run_query(query):
-    """Return the query result of current query. e.g: query=(selcet * from emp) will return all elements from table emp"""
+def run_query(query, returnQuery=True):
+    """Run the input query, if returnQuery==True, it will return the query result of current query. e.g: query=(selcet * from emp) will return all elements from table emp
+       If returnQuery==False, it will not return the query result. not return is decided for the insert/ delete/ update sql types """
     #TO-DO (optional) check SQL injection in query=(selcet * from emp where username=('; select true; -- ))
     #https://realpython.com/prevent-python-sql-injection/
     with tunnel() as _:
@@ -391,9 +405,10 @@ def run_query(query):
                 with connection.cursor() as cursor:
                     cursor.execute(query)
                     connection.commit()
-                    data = cursor.fetchall()
-                    logging.getLogger('SSHClient').info(query + " result is:" + str(data))
-                    return data
+                    if returnQuery:
+                        data = cursor.fetchall()
+                        logging.getLogger('SSHClient').info(query + " result is:" + str(data))
+                        return data
                     
         except oracledb.Error as err:
             logging.getLogger('SSHClient').info("Query:" , query, str(err))
