@@ -53,12 +53,12 @@ def run(compUserID="", compPassword=""):
                                 query_Result = run_query("select * from LOAN_RECORDS")
                                 print("Loan records:")
                                 for row in query_Result:
-                                    print("READER_ID: ",row[0], ',data', row[1])
+                                    print("READER_ID: ",row[0], ', data', row[1])
                             elif (checkBy == "2"): 
                                 query_Result = run_query("select * from RESERVE_RECORDS")
                                 print("Reserve records:")
                                 for row in query_Result:
-                                    print("READER_ID: ",row[0], ',data', row[1])
+                                    print("READER_ID: ",row[0], ', data', row[1])
                             elif (checkBy == "3"): 
                                 ISBN = input("Enter a ISBN of book to check it's current holding in library:")
                                 holdings = checkHoldings(ISBN)
@@ -321,7 +321,15 @@ def initDatabase():
         ('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001'),
         ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story', 96.3, '001'),
         ('9780134583006', 'C++ How to Program', 'Paul Deitel', 'textbook', 173.2, '002'),
-        ('9780130402646', 'Database System Implementation', 'Hector Garcia-Molina', 'textbook', 140.9, '003')
+        ('9780130402646', 'Database System Implementation', 'Hector Garcia-Molina', 'textbook', 140.9, '003'),
+        ('9780367184568',
+         'How learning happens : seminal works in educational psychology and what they mean in practice',
+         'Kirschner, Paul A.& Hendrick, Carl', 'Non-fiction', 263, '003'),
+        ('9780312425074', 'The world is flat', 'Thomas L. Friedman', 'Non-fiction', 388, '002'),
+        ('0393975428', 'Jane Eyre', 'Charlotte Brontë', 'Fiction', 100, '001'),
+        ('0521223407', 'Macbeth', 'William Shakespeare', 'Drama', 106, '002'),
+        ('0521827957', 'Othello', 'William Shakespeare', 'Drama', 106, '002'),
+        ('9782013235006', 'Les Misérable', 'Victor Hugo', 'Fiction', 398, '002')
     ]
     publishers = [
         # PUBLISHER_ID VARCHAR(3) not null, Name VARCHAR(30)
@@ -358,7 +366,13 @@ def initDatabase():
         ('9781784975692', 5, 30, 1.5),
         ('9781800240346', 1, 14, 1.0),
         ('9780134583006', 2, 30, 2),
-        ('9780130402646', 2, 30, 1.5)
+        ('9780130402646', 2, 30, 1.5),
+        ('9780367184568', 5, 30, 1.5),
+        ('9780312425074', 5, 30, 1.5),
+        ('0393975428', 6, 30, 1.5),
+        ('0521223407', 7, 30, 1.5),
+        ('0521827957', 8, 30, 1.5),
+        ('9782013235006', 3, 30, 1.5)
     ]
 
     for table in tableNames:
