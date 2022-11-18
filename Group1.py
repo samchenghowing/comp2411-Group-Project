@@ -392,8 +392,8 @@ def initDatabase():
     loan_records = [
         # READER_ID VARCHAR(9) not null, ISBN VARCHAR(13) not null, Loan_date DATE
         ('samReader', '9780130402646', date(2022, 10, 15)),
-        ('AnyaYA', '9781784975692', date(2022, 10, 23)),
-        ('AnyaYA', '9781800240346', date(2022, 10, 13)),
+        ('AnyaYA', '9781784975692', date(2022, 11, 23)),
+        ('AnyaYA', '9781800240346', date(2022, 12, 13)),
         ('21106945d', '9781784975692', date(2022, 10, 23))
     ]
     reserve_records = [
