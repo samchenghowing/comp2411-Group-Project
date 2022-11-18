@@ -1,0 +1,19 @@
+19:46:48,657 SSHClient INFO The logger is initialized
+19:46:48,657 SSHClient INFO init SSH error: module 'paramiko' has no attribute 'SSHConfig'
+19:47:30,606 SSHClient INFO The logger is initialized
+19:47:30,606 SSHClient INFO init SSH error: module 'paramiko' has no attribute 'SSHConfig'
+19:47:42,621 SSHClient INFO The logger is initialized
+19:47:42,622 SSHClient INFO init SSH error: module 'paramiko' has no attribute 'SSHConfig'
+19:50:22,603 SSHClient INFO The logger is initialized
+19:50:22,606 SSHClient INFO init SSH error: module 'paramiko' has no attribute 'SSHConfig'
+19:51:52,944 SSHClient INFO The logger is initialized
+19:51:53,553 SSHClient INFO Testing query result is:None
+19:52:05,697 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='Holly.Z' result is:[]
+19:52:06,190 SSHClient INFO select READER_ID, password from READERS where READER_ID='Holly.Z' result is:[]
+19:52:56,793 SSHClient INFO The logger is initialized
+19:52:59,159 sshtunnel.SSHTunnelForwarder ERROR Could not open connection to gateway
+19:52:59,160 SSHClient INFO init SSH error: Could not establish session to SSH gateway
+19:53:59,640 SSHClient INFO The logger is initialized
+19:54:00,114 SSHClient INFO Testing query result is:None
+19:54:09,458 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[]
+19:54:09,849 SSHClient INFO select READER_ID, password from READERS where READER_ID='HollyZ' result is:[]
