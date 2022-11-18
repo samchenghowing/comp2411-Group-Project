@@ -17,3 +17,9 @@
 19:54:00,114 SSHClient INFO Testing query result is:None
 19:54:09,458 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[]
 19:54:09,849 SSHClient INFO select READER_ID, password from READERS where READER_ID='HollyZ' result is:[]
+20:01:08,462 SSHClient INFO The logger is initialized
+20:01:08,464 SSHClient INFO init SSH error: module 'paramiko' has no attribute 'SSHConfig'
+20:01:33,519 SSHClient INFO The logger is initialized
+20:01:34,30 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+20:05:53,169 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[]
+20:05:53,690 SSHClient INFO select READER_ID, password from READERS where READER_ID='HollyZ' result is:[]
