@@ -1,0 +1,98 @@
+20:09:05,694 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+20:09:15,673 SSHClient INFO Database initize success
+20:09:45,206 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[('HollyZ', 'pw4')]
+20:09:52,876 SSHClient INFO select ISBN, Title, Author, Category from books 
+                            where LOWER(Author) like LOWER('%william%')  result is:[('0521223407', 'Macbeth', 'William Shakespeare', 'Drama'), ('0521827957', 'Othello', 'William Shakespeare', 'Drama')]
+20:25:55,954 SSHClient INFO The logger is initialized
+20:25:56,565 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+20:26:18,45 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='samReader' result is:[]
+20:26:18,719 SSHClient INFO select READER_ID, password from READERS where READER_ID='samReader' result is:[('samReader', 'pw1')]
+20:26:19,633 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('AnyaYA', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('21106945d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('AnyaYA', datetime.datetime(2022, 10, 13, 0, 0), '9781800240346', 14), ('samReader', datetime.datetime(2022, 10, 15, 0, 0), '9780130402646', 30)]
+20:26:20,179 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='samReader' result is:[('Database System Implementation', datetime.datetime(2022, 10, 15, 0, 0), 30, '9780130402646', 1.5)]
+22:11:41,897 SSHClient INFO The logger is initialized
+22:11:45,199 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+22:11:51,461 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[('HollyZ', 'pw4')]
+22:11:58,690 SSHClient INFO select ISBN, Title, Author, Category from books 
+                            where LOWER(Title) like LOWER('%THE%')  result is:[('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story'), ('9781800240346', 'The Grace of Kings', 'Ken Liu', 'short-story'), ('9780312425074', 'The world is flat', 'Thomas Friedman', 'Non-fiction'), ('0521827957', 'Othello', 'William Shakespeare', 'Drama')]
+22:18:49,24 SSHClient INFO select ISBN, Title, Author, Category from books 
+                            where LOWER(Author) like LOWER('%Thomas%')  result is:[('9780312425074', 'The world is flat', 'Thomas Friedman', 'Non-fiction')]
+22:38:39,214 SSHClient INFO The logger is initialized
+22:38:42,295 sshtunnel.SSHTunnelForwarder ERROR Could not open connection to gateway
+22:38:42,297 SSHClient INFO init SSH error: Could not establish session to SSH gateway
+22:38:57,153 SSHClient INFO The logger is initialized
+22:38:57,642 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+22:39:05,211 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='HollyZ' result is:[('HollyZ', 'pw4')]
+22:39:11,894 SSHClient INFO select * from LOAN_RECORDS result is:[('samReader', '9780130402646', datetime.datetime(2022, 10, 15, 0, 0)), ('AnyaYA', '9781784975692', datetime.datetime(2022, 10, 23, 0, 0)), ('AnyaYA', '9781800240346', datetime.datetime(2022, 10, 13, 0, 0)), ('21106945d', '9781784975692', datetime.datetime(2022, 10, 23, 0, 0))]
+22:39:36,451 SSHClient INFO select * from RESERVE_RECORDS result is:[('21106945d', '9781800240346', datetime.datetime(2010, 10, 13, 0, 0))]
+22:39:53,528 SSHClient INFO select Holdings from RECORD_SYSTEM where ISBN='0393975428'  result is:[(6,)]
+22:39:54,104 SSHClient INFO select count(*) from LOAN_RECORDS where ISBN='0393975428'  result is:[(0,)]
+22:39:54,882 SSHClient INFO select count(*) from RESERVE_RECORDS where ISBN='0393975428'  result is:[(0,)]
+22:44:52,897 SSHClient INFO Database initize success
+22:47:44,217 SSHClient INFO The logger is initialized
+22:47:44,745 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+22:48:26,451 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='samReader' result is:[]
+22:48:26,859 SSHClient INFO select READER_ID, password from READERS where READER_ID='samReader' result is:[('samReader', 'pw1')]
+22:48:27,311 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('AnyaYA', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('21106945d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('AnyaYA', datetime.datetime(2022, 10, 13, 0, 0), '9781800240346', 14), ('samReader', datetime.datetime(2022, 10, 15, 0, 0), '9780130402646', 30)]
+22:48:27,707 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='samReader' result is:[('Database System Implementation', datetime.datetime(2022, 10, 15, 0, 0), 30, '9780130402646', 1.5)]
+22:51:51,440 SSHClient INFO The logger is initialized
+22:51:53,450 sshtunnel.SSHTunnelForwarder ERROR Could not open connection to gateway
+22:51:53,452 SSHClient INFO init SSH error: Could not establish session to SSH gateway
+22:52:02,700 SSHClient INFO The logger is initialized
+22:52:04,49 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+22:52:11,396 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='AnyaYA' result is:[]
+22:52:11,815 SSHClient INFO select READER_ID, password from READERS where READER_ID='AnyaYA' result is:[('AnyaYA', 'pw2')]
+22:52:12,218 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('AnyaYA', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('21106945d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('AnyaYA', datetime.datetime(2022, 10, 13, 0, 0), '9781800240346', 14), ('samReader', datetime.datetime(2022, 10, 15, 0, 0), '9780130402646', 30)]
+22:52:12,627 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='AnyaYA' result is:[('The paper menagerie', datetime.datetime(2022, 10, 23, 0, 0), 30, '9781784975692', 1.5), ('The Grace of Kings', datetime.datetime(2022, 10, 13, 0, 0), 14, '9781800240346', 1.0)]
+22:52:33,295 SSHClient INFO The logger is initialized
+22:52:33,735 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+22:52:53,197 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='21106945d' result is:[]
+22:52:53,609 SSHClient INFO select READER_ID, password from READERS where READER_ID='21106945d' result is:[('21106945d', 'pw3')]
+22:52:54,204 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('AnyaYA', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('21106945d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('AnyaYA', datetime.datetime(2022, 10, 13, 0, 0), '9781800240346', 14), ('samReader', datetime.datetime(2022, 10, 15, 0, 0), '9780130402646', 30)]
+22:52:54,631 SSHClient INFO select name from READERS where READER_ID='21106945d' result is:[('Anshu',)]
+22:52:55,41 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='21106945d' result is:[('The paper menagerie', datetime.datetime(2022, 10, 23, 0, 0), 30, '9781784975692', 1.5)]
+22:53:26,815 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='21106945d' result is:[]
+22:53:52,284 SSHClient INFO select BOOKS.Title, RESERVE_RECORDS.Reserve_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN
+                                from RESERVE_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=RESERVE_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='21106945d' result is:[('The Grace of Kings', datetime.datetime(2010, 10, 13, 0, 0), 14, '9781800240346')]
+22:53:52,789 SSHClient INFO select Holdings from RECORD_SYSTEM where ISBN='0521223407'  result is:[(7,)]
+22:53:53,185 SSHClient INFO select count(*) from LOAN_RECORDS where ISBN='0521223407'  result is:[(0,)]
+22:53:53,613 SSHClient INFO select count(*) from RESERVE_RECORDS where ISBN='0521223407'  result is:[(0,)]
+22:53:54,443 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='21106945d' result is:[]
+23:06:09,980 SSHClient INFO The logger is initialized
+23:06:10,552 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+23:06:18,540 SSHClient INFO Database initize success
+23:06:41,984 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='AnyaYA' result is:[]
+23:06:42,491 SSHClient INFO select READER_ID, password from READERS where READER_ID='AnyaYA' result is:[('AnyaYA', 'pw2')]
+23:06:42,922 SSHClient INFO select LOAN_RECORDS.READER_ID, LOAN_RECORDS.Loan_date, LOAN_RECORDS.ISBN, RECORD_SYSTEM.Expire_Period 
+                                                from LOAN_RECORDS INNER JOIN RECORD_SYSTEM ON LOAN_RECORDS.ISBN=RECORD_SYSTEM.ISBN result is:[('AnyaYA', datetime.datetime(2022, 11, 23, 0, 0), '9781784975692', 30), ('21106945d', datetime.datetime(2022, 10, 23, 0, 0), '9781784975692', 30), ('AnyaYA', datetime.datetime(2022, 12, 13, 0, 0), '9781800240346', 14), ('samReader', datetime.datetime(2022, 10, 15, 0, 0), '9780130402646', 30)]
+23:06:43,445 SSHClient INFO select name from READERS where READER_ID='AnyaYA' result is:[('Anya',)]
+23:06:43,980 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='AnyaYA' result is:[('The paper menagerie', datetime.datetime(2022, 11, 23, 0, 0), 30, '9781784975692', 1.5), ('The Grace of Kings', datetime.datetime(2022, 12, 13, 0, 0), 14, '9781800240346', 1.0)]
+23:07:04,986 SSHClient INFO select BOOKS.Title, LOAN_RECORDS.Loan_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN, RECORD_SYSTEM.Daily_Charge
+                                from LOAN_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=LOAN_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
+                                where READER_ID='AnyaYA' result is:[('The Grace of Kings', datetime.datetime(2022, 12, 13, 0, 0), 14, '9781800240346', 1.0)]
+23:07:24,966 SSHClient INFO select Holdings from RECORD_SYSTEM where ISBN='9781800240346'  result is:[(1,)]
+23:07:25,495 SSHClient INFO select count(*) from LOAN_RECORDS where ISBN='9781800240346'  result is:[(1,)]
+23:07:25,943 SSHClient INFO select count(*) from RESERVE_RECORDS where ISBN='9781800240346'  result is:[(1,)]
+23:13:27,793 SSHClient INFO The logger is initialized
+23:13:30,209 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+23:13:40,144 SSHClient INFO Database initize success
+23:15:11,712 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='q' result is:[]
+23:15:12,214 SSHClient INFO select READER_ID, password from READERS where READER_ID='q' result is:[]
