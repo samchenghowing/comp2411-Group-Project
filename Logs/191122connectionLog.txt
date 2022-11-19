@@ -1,0 +1,13 @@
+19:27:27,161 SSHClient INFO The logger is initialized
+19:27:27,767 SSHClient INFO Testing query result is:('9781784975692', 'The paper menagerie', 'Ken Liu', 'short-story', 89.9, '001')
+19:28:57,288 SSHClient INFO select LIBRARIAN_ID, password from LIBRARIANS where LIBRARIAN_ID='Holly' result is:[('Holly', 'pw4')]
+19:30:59,48 SSHClient INFO select BOOKS.ISBN, BOOKS.Title, RECORD_SYSTEM.Expire_Period, RECORD_SYSTEM.Daily_Charge
+                            from BOOKS INNER JOIN RECORD_SYSTEM ON BOOKS.ISBN=RECORD_SYSTEM.ISBN 
+                            where RECORD_SYSTEM.ISBN='9781784975692'  result is:[('9781784975692', 'The paper menagerie', 30, 1.5)]
+19:30:59,542 SSHClient INFO select Holdings from RECORD_SYSTEM where ISBN='9781784975692'  result is:[(5,)]
+19:30:59,965 SSHClient INFO select count(*) from LOAN_RECORDS where ISBN='9781784975692'  result is:[(2,)]
+19:31:09,388 SSHClient INFO select BOOKS.ISBN, BOOKS.Title, RECORD_SYSTEM.Expire_Period, RECORD_SYSTEM.Daily_Charge
+                            from BOOKS INNER JOIN RECORD_SYSTEM ON BOOKS.ISBN=RECORD_SYSTEM.ISBN 
+                            where RECORD_SYSTEM.ISBN='9781784975692'  result is:[('9781784975692', 'The paper menagerie', 30, 1.5)]
+19:31:09,917 SSHClient INFO select Holdings from RECORD_SYSTEM where ISBN='9781784975692'  result is:[(5,)]
+19:31:10,440 SSHClient INFO select count(*) from LOAN_RECORDS where ISBN='9781784975692'  result is:[(2,)]

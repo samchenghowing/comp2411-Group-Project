@@ -41,11 +41,11 @@ def run(compUserID="", compPassword=""):
         else:
             if vaildPassword:
                 if isAdminUser:
-                    var = input("""Welcome admin, plese enter your option\n1 for search books, 2 for checking records, 3 for initialize Database, 4 for Change book fees/ expiry period, q for quit: """)
+                    var = input("""Welcome admin, please enter your option\n1 for search books, 2 for checking records, 3 for initialize Database, 4 for Change book fees / expiry period, q for quit: """)
                     while var != "q":
                         if (var == "1"):
                             searchBy = input(
-                                "plese enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
+                                "please enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
                             if (searchBy == "1"):
                                 searchByTitle()
                             elif (searchBy == "2"):
@@ -53,7 +53,7 @@ def run(compUserID="", compPassword=""):
                             elif (searchBy == "3"):
                                 searchByCategory()
                         elif (var == "2"):
-                            checkBy = input("plese enter your check option\n(1 for check loan record, 2 for check reserve record, 3 for check book status):")
+                            checkBy = input("please enter your check option\n(1 for check loan record, 2 for check reserve record, 3 for check book status):")
                             if (checkBy == "1"): 
                                 query_Result = run_query("""select READERS.Name, LOAN_RECORDS.ISBN ,LOAN_RECORDS.Loan_date
                                                             from LOAN_RECORDS INNER JOIN READERS ON LOAN_RECORDS.READER_ID=READERS.READER_ID""")
@@ -81,7 +81,7 @@ def run(compUserID="", compPassword=""):
                             updateBookStatus(ISBN, fee, expiryPeriod)
                         else:
                             print("Invaild input!")
-                        var = input("""plese enter your your option\n1 for search books, 2 for checking records, 3 for initialize Database, 4 for Change book fees/ expiry period, q for quit: """)
+                        var = input("""please enter your your option\n1 for search books, 2 for checking records, 3 for initialize Database, 4 for Change book fees / expiry period, q for quit: """)
                 else:
                     if userStatus == False:
                         print("Your account is deactivated since you have not return your expired book(s) listed:")
@@ -93,11 +93,11 @@ def run(compUserID="", compPassword=""):
                         loanedBooks = getLoanedBooks(userID)
                         getReservedBooks(userID)
                         var = input(
-                            "plese enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
+                            "please enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
                         while var != "q":
                             if (var == "1"):
                                 searchBy = input(
-                                    "plese enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
+                                    "please enter your search option\n(1 for search by title, 2 for search by Author, 3 for search by Category):")
                                 if (searchBy == "1"):
                                     searchByTitle()
                                 elif (searchBy == "2"):
@@ -152,7 +152,7 @@ def run(compUserID="", compPassword=""):
                             else:
                                 print("Invaild input!")
                             var = input(
-                                "plese enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
+                                "please enter your option\n(1 for search books, 2 for retrun books, 3 for loan book, 4 for reserve books, q for quit):")
             else:
                 print("Your LMS username/password is not correct, please try again")
     else:
@@ -254,13 +254,13 @@ def getHoldings(ISBN):
 
 def searchByTitle():
     """Search book by title"""
-    title = input("plese enter the title to search: ")
+    title = input("please enter the title to search: ")
     searchBooks(title, 1)
 
 
 def searchByAuthor():
     """Search book by Author"""
-    Author = input("plese enter the Author to search: ")
+    Author = input("please enter the Author to search: ")
     searchBooks(Author, 2)
 
 
@@ -270,7 +270,7 @@ def searchByCategory():
     print("Listed Categories in libary system: ")
     for row in data:
         print(row[0])
-    Categories = input("plese enter the Categories to search: ")
+    Categories = input("please enter the Categories to search: ")
     searchBooks(Categories, 3)
 
 
