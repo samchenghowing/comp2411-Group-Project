@@ -91,6 +91,7 @@ def run(compUserID="", compPassword=""):
                         name = run_query("select name from READERS where READER_ID=\'" + userID + "\'")
                         print("Welcome:", str(name[0]).strip(",()'"))
                         loanedBooks = getLoanedBooks(userID)
+                        getReservedBooks(userID)
                         var = input(
                             "plese enter your option\n(1 for search books, 2 for return books, 3 for loan book, 4 for reserve books, q for quit):")
                         while var != "q":
@@ -142,22 +143,15 @@ def run(compUserID="", compPassword=""):
                                         print("Loan success!")
                                         loanedBooks = getLoanedBooks(userID)
                                     else:
-                                        print(
-                                            "The library holding of selected book is currently out of stock, please check again later.")
+                                        isReserve = input("The library holding of selected book is currently out of stock, do you want to reserve it?Y/N")
+                                        if isReserve =='Y' or isReserve =='y':
+                                            reserveBook(ISBN, userID)
                                 else:
                                     print("your loan quota is exceeded!")
                             elif (var == "4"):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to reserve: ")
-                                    if getHoldings(ISBN) > 0:
-                                        today = date.today().strftime("%m/%d/%Y")
-                                        run_query(
-                                            "insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
-                                        print("Reserve success!")
-                                        getReservedBooks(userID)
-                                    else:
-                                        print(
-                                            "The library holding of selected book is currently out of stock, please check again later.")
+                                    reserveBook(ISBN, userID)
                                 else:
                                     print("your reserve quota is exceeded!")
                             else:
@@ -169,6 +163,12 @@ def run(compUserID="", compPassword=""):
     else:
         print("Your comp intranet username/password is not correct, cannot connect to department server")
 
+def reserveBook(ISBN, userID):
+    today = date.today().strftime("%m/%d/%Y")
+    run_query(
+        "insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
+    print("Reserve success!")
+    getReservedBooks(userID)
 
 def updateBookStatus(ISBN, fee, expiryPeriod):
     """Make use of the UPDATE sql keyword to update the attribute value in table RECORD_SYSTEM"""
@@ -208,7 +208,7 @@ def checkBookStatus(ISBN):
         for row in status:
             print("ISBN:",row[0]," Title:", row[1], " Expire_Period:",row[2] , " Daily_Charge:",row[3]," Holdings:", holdings )
 
-def getReservedBooks(userID, show=True):
+def getReservedBooks(userID):
     """get the books reserved by current user (userID), it will display the record if (show) is true """
     reservedBooks = run_query("""select BOOKS.Title, RESERVE_RECORDS.Reserve_date, RECORD_SYSTEM.Expire_Period, BOOKS.ISBN
                                 from RESERVE_RECORDS INNER JOIN BOOKS ON BOOKS.ISBN=RESERVE_RECORDS.ISBN INNER JOIN RECORD_SYSTEM ON RECORD_SYSTEM.ISBN=BOOKS.ISBN
@@ -218,6 +218,7 @@ def getReservedBooks(userID, show=True):
         for row in reservedBooks:
             expireDay = row[1].date() + timedelta(days=int(row[2]))
             print("ISBN:", row[3], "Title:", row[0], " reserve period ends at:", str(expireDay))
+            checkBookStatus(row[3])
     else:
         print("You don't have books reserved")
     return reservedBooks
@@ -433,7 +434,7 @@ def initDatabase():
     ]
     reserve_records = [
         # READER_ID VARCHAR(9) not null, ISBN VARCHAR(13) not null, Reserve_date DATE
-        ('21106945d', '9781800240346', date(2010, 10, 13))
+        ('21106945d', '9781800240346', date(2022, 11, 13))
     ]
     record_system = [
         # ISBN VARCHAR(13) not null, Holdings NUMBER(2) not null, Expire_Period NUMBER(2), Daily_Charge NUMBER(3, 2)
