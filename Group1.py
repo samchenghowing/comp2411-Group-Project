@@ -84,7 +84,6 @@ def run(compUserID="", compPassword=""):
                         var = input("""plese enter your your option\n1 for search books, 2 for checking records, 3 for initialize Database, 4 for Change book fees/ expiry period, q for quit: """)
                 else:
                     if userStatus == False:
-                        # 2 Deactivate a patron’s account if he/she does not return books after a specific period of time passes
                         print("Your account is deactivated since you have not return your expired book(s) listed:")
                         loanedBooks = getLoanedBooks(userID)
                         print("Please return the book(s) and pay the expire fee in-person to reactivate your account!")
@@ -124,7 +123,6 @@ def run(compUserID="", compPassword=""):
                             elif (var == "3"):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to loan: ")
-                                    # TO-DO (Optional) check if the book is loan by current user first to make sure user will not occupy more than one same book,
                                     isReserved = False
                                     reservedBooks = getReservedBooks(userID,
                                                                      False)  # if it is Reserved by current user, remove the reserve record
@@ -151,9 +149,6 @@ def run(compUserID="", compPassword=""):
                             elif (var == "4"):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to reserve: ")
-                                    # TO-DO (Optional) check is reserved by current user first to make sure user will not occupy more than one same book,
-                                    # getReservedBooks(userID)
-
                                     if getHoldings(ISBN) > 0:
                                         today = date.today().strftime("%m/%d/%Y")
                                         run_query(
@@ -383,7 +378,6 @@ def initSSHTunnel(compUserID, compPassword):
 
 def initDatabase():
     """Create sample table and data for testing and demo use"""
-    # TO-DO add more data
     print("initializating...\n")
     tableNames = ["BOOKS", "PUBLISHERS", "LIBRARIANS", "READERS", "LOAN_RECORDS", "RESERVE_RECORDS", "RECORD_SYSTEM"]
     createQuerys = [
@@ -433,6 +427,9 @@ def initDatabase():
         ('samReader', '9780130402646', date(2022, 10, 15)),
         ('AnyaYA', '9781784975692', date(2022, 11, 23)),
         ('AnyaYA', '9781800240346', date(2022, 12, 13)),
+        ('AnyaYA', '0393975428', date(2022, 12, 13)),
+        ('AnyaYA', '9782013235006', date(2022, 12, 13)),
+        ('AnyaYA', '9780134583006', date(2022, 12, 13)),
         ('21106945d', '9781784975692', date(2022, 10, 23))
     ]
     reserve_records = [
@@ -491,8 +488,6 @@ def tunnel():
 def run_query(query, returnQuery=True):
     """Run the input query, if returnQuery==True, it will return the query result of current query. e.g: query=(selcet * from emp) will return all elements from table emp
        If returnQuery==False, it will not return the query result. not return is decided for the insert/ delete/ update sql types """
-    # TO-DO (optional) check SQL injection in query=(selcet * from emp where username=('; select true; -- ))
-    # https://realpython.com/prevent-python-sql-injection/
     with tunnel() as _:
         try:
             with oracledb.connect(user=db_user, password=db_password, dsn=dsn) as connection:
