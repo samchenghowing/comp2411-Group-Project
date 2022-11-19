@@ -125,8 +125,7 @@ def run(compUserID="", compPassword=""):
                                 if len(loanedBooks) <= 6:
                                     ISBN = input("Enter the book ISBN you want to loan: ")
                                     isReserved = False
-                                    reservedBooks = getReservedBooks(userID,
-                                                                     False)  # if it is Reserved by current user, remove the reserve record
+                                    reservedBooks = getReservedBooks(userID)  # if it is Reserved by current user, remove the reserve record
                                     for row in reservedBooks:
                                         if ISBN in row[3]:
                                             isReserved = True
@@ -247,16 +246,14 @@ def getLoanedBooks(userID, show=True):
     return loanedBooks
 
 def getHoldings(ISBN):
-    """Return a number of books hold by the library (not loaned out/ reserved)"""
+    """Return a number of books hold by the library (not loaned out)"""
     holdings = run_query("""select Holdings from RECORD_SYSTEM where ISBN=\'""" + ISBN + """\' """)
     if len(holdings) == 0:
         return -1  # book not exist (not holded by the library)
     loaned = run_query("""select count(*) from LOAN_RECORDS where ISBN=\'""" + ISBN + """\' """)
-    reserved = run_query("""select count(*) from RESERVE_RECORDS where ISBN=\'""" + ISBN + """\' """)
     holdingsNum = str(holdings[0]).strip(",()'")
     loanedNum = str(loaned[0]).strip(",()'")
-    reservedNum = str(reserved[0]).strip(",()'")
-    return (int(holdingsNum[0]) - int(loanedNum[0]) - int(reservedNum[0]))
+    return (int(holdingsNum[0]) - int(loanedNum[0]))
 
 
 def searchByTitle():
