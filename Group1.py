@@ -138,13 +138,9 @@ def run(compUserID="", compPassword=""):
                                     if getHoldings(ISBN) > 0:
                                         today = date.today().strftime("%m/%d/%Y")
                                         run_query(
-                                            "insert into LOAN_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
+                                            "insert into LOAN_RECORDS values (\'" + userID + "\', \'" + ISBN + "\', TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
                                         print("Loan success!")
                                         loanedBooks = getLoanedBooks(userID)
-                                    else:
-                                        isReserve = input("The library holding of selected book is currently out of stock, do you want to reserve it?Y/N")
-                                        if isReserve =='Y' or isReserve =='y':
-                                            reserveBook(ISBN, userID)
                                 else:
                                     print("your loan quota is exceeded!")
                             elif (var == "4"):
@@ -165,7 +161,7 @@ def run(compUserID="", compPassword=""):
 def reserveBook(ISBN, userID):
     today = date.today().strftime("%m/%d/%Y")
     run_query(
-        "insert into RESERVE_RECORDS values (\'" + userID + "\', " + ISBN + ", TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
+        "insert into RESERVE_RECORDS values (\'" + userID + "\', \'" + ISBN + "\', TO_DATE(\'" + today + "\', 'MM/DD/YYYY'))", False)
     print("Reserve success!")
     getReservedBooks(userID)
 
